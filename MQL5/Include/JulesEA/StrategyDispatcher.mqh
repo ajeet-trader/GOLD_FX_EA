@@ -17,7 +17,8 @@
 #include "IndicatorManager.mqh"
 
 // Base Strategy Class to simplify implementations
-// Removed IModule interface to avoid multiple inheritance issues.
+// INHERITANCE FIX: Inherits ONLY from CObject to avoid multiple inheritance issues.
+// Removed IModule interface.
 class CStrategyBase : public CObject
 {
 protected:

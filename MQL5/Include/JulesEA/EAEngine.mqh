@@ -45,40 +45,62 @@ public:
     {
        // 1. Initialize Logger
        m_logger = new CLogger();
-       // Using "Common" folder might be better for logs if we want them persisted easily across tests,
-       // but strictly speaking file write should be careful.
        // Using standard local file "JulesEA_Log.csv"
-       if(!m_logger->Initialize("JulesEA_Log.csv", LOG_LEVEL_INFO))
+       if(CheckPointer(m_logger) != POINTER_INVALID)
        {
-          Print("CRITICAL: Failed to initialize Logger!");
+          if(!m_logger->Initialize("JulesEA_Log.csv", LOG_LEVEL_INFO))
+          {
+             Print("CRITICAL: Failed to initialize Logger!");
+             return false;
+          }
+          m_logger->LogInfo("EAEngine", "Initialize", "Starting initialization sequence...");
+       }
+       else
+       {
+          Print("CRITICAL: Logger allocation failed!");
           return false;
        }
 
-       m_logger->LogInfo("EAEngine", "Initialize", "Starting initialization sequence...");
-
        // 2. Initialize Components
        m_indicatorManager = new CIndicatorManager(m_logger);
-       if(!m_indicatorManager->Initialize()) return false;
+       if(CheckPointer(m_indicatorManager) != POINTER_INVALID)
+       {
+          if(!m_indicatorManager->Initialize()) return false;
+       }
+       else return false;
 
        m_riskManager = new CRiskManager(m_logger);
-       if(!m_riskManager->Initialize()) return false;
+       if(CheckPointer(m_riskManager) != POINTER_INVALID)
+       {
+          if(!m_riskManager->Initialize()) return false;
+       }
+       else return false;
 
        m_tradeExecutor = new CTradeExecutor(m_logger);
-       if(!m_tradeExecutor->Initialize(123456)) return false; // Magic number could be param
+       if(CheckPointer(m_tradeExecutor) != POINTER_INVALID)
+       {
+          if(!m_tradeExecutor->Initialize(123456)) return false; // Magic number could be param
+       }
+       else return false;
 
        // 3. Initialize Strategy Dispatcher
        m_strategyDispatcher = new CStrategyDispatcher(m_logger, m_indicatorManager, m_riskManager, m_tradeExecutor);
-       if(!m_strategyDispatcher->Initialize()) return false;
+       if(CheckPointer(m_strategyDispatcher) != POINTER_INVALID)
+       {
+          if(!m_strategyDispatcher->Initialize()) return false;
+       }
+       else return false;
 
        m_initialized = true;
-       m_logger->LogInfo("EAEngine", "Initialize", "Initialization complete.");
+       if(CheckPointer(m_logger) != POINTER_INVALID)
+          m_logger->LogInfo("EAEngine", "Initialize", "Initialization complete.");
        return true;
     }
 
     // Allow registering strategies externally (e.g. from main .mq5)
     bool RegisterStrategy(CStrategyBase* strategy)
     {
-       if(!m_initialized || m_strategyDispatcher == NULL) return false;
+       if(!m_initialized || CheckPointer(m_strategyDispatcher) == POINTER_INVALID) return false;
        return m_strategyDispatcher->RegisterStrategy(strategy);
     }
 
@@ -86,19 +108,13 @@ public:
     {
        if(!m_initialized) return;
 
-       // Update all indicators first (optimization: could be per symbol)
-       m_indicatorManager->UpdateAllIndicators();
+       // Update all indicators first
+       if(CheckPointer(m_indicatorManager) != POINTER_INVALID)
+          m_indicatorManager->UpdateAllIndicators();
 
-       // Process Strategy Logic for the current symbol (or iterate all if multi-currency on one chart)
-       // Standard MT5 EA OnTick triggers for the chart symbol.
-       // For multi-currency, we might need OnTimer or check other symbols here.
-       // Assuming this EA runs on specific charts or manages specific symbols.
-       // We pass the current chart symbol to the dispatcher.
-       m_strategyDispatcher->ProcessTick(_Symbol);
-
-       // If this is a true multi-currency EA running on one chart (e.g. EURUSD) but trading others,
-       // we would need to iterate a list of symbols here.
-       // For Phase 1, we will stick to the chart symbol mostly, but the architecture supports others.
+       // Process Strategy Logic for the current symbol
+       if(CheckPointer(m_strategyDispatcher) != POINTER_INVALID)
+          m_strategyDispatcher->ProcessTick(_Symbol);
     }
 
     void OnTrade()
@@ -113,15 +129,16 @@ public:
 
     void Deinitialize()
     {
-       if(m_logger) m_logger->LogInfo("EAEngine", "Deinitialize", "Shutting down...");
+       if(CheckPointer(m_logger) != POINTER_INVALID)
+          m_logger->LogInfo("EAEngine", "Deinitialize", "Shutting down...");
 
-       if(m_strategyDispatcher != NULL) { delete m_strategyDispatcher; m_strategyDispatcher = NULL; }
-       if(m_tradeExecutor != NULL) { delete m_tradeExecutor; m_tradeExecutor = NULL; }
-       if(m_riskManager != NULL) { delete m_riskManager; m_riskManager = NULL; }
-       if(m_indicatorManager != NULL) { delete m_indicatorManager; m_indicatorManager = NULL; }
+       if(CheckPointer(m_strategyDispatcher) != POINTER_INVALID) { delete m_strategyDispatcher; m_strategyDispatcher = NULL; }
+       if(CheckPointer(m_tradeExecutor) != POINTER_INVALID) { delete m_tradeExecutor; m_tradeExecutor = NULL; }
+       if(CheckPointer(m_riskManager) != POINTER_INVALID) { delete m_riskManager; m_riskManager = NULL; }
+       if(CheckPointer(m_indicatorManager) != POINTER_INVALID) { delete m_indicatorManager; m_indicatorManager = NULL; }
 
        // Delete logger last
-       if(m_logger != NULL) { delete m_logger; m_logger = NULL; }
+       if(CheckPointer(m_logger) != POINTER_INVALID) { delete m_logger; m_logger = NULL; }
 
        m_initialized = false;
     }

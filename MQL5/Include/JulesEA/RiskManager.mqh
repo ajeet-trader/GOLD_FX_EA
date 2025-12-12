@@ -34,7 +34,8 @@ public:
    bool Initialize()
    {
       m_initialBalance = AccountInfoDouble(ACCOUNT_BALANCE);
-      if(m_logger) m_logger->LogInfo("RiskManager", "Initialize", StringFormat("Initialized with Balance: %.2f", m_initialBalance));
+      if(CheckPointer(m_logger) != POINTER_INVALID)
+         m_logger->LogInfo("RiskManager", "Initialize", StringFormat("Initialized with Balance: %.2f", m_initialBalance));
       return true;
    }
 
@@ -42,18 +43,16 @@ public:
    bool IsTradingAllowed()
    {
       double currentEquity = AccountInfoDouble(ACCOUNT_EQUITY);
-      double currentBalance = AccountInfoDouble(ACCOUNT_BALANCE);
 
       // 1. Max Drawdown check (from initial or high watermark - keeping simple here vs initial)
       double drawdown = (m_initialBalance - currentEquity) / m_initialBalance * 100.0;
 
       if(drawdown >= m_maxDrawdownPercent)
       {
-         if(m_logger) m_logger->LogCritical("RiskManager", "IsTradingAllowed", StringFormat("Max Drawdown exceeded! Current: %.2f%%, Max: %.2f%%", drawdown, m_maxDrawdownPercent));
+         if(CheckPointer(m_logger) != POINTER_INVALID)
+            m_logger->LogCritical("RiskManager", "IsTradingAllowed", StringFormat("Max Drawdown exceeded! Current: %.2f%%, Max: %.2f%%", drawdown, m_maxDrawdownPercent));
          return false;
       }
-
-      // Additional checks like Daily Loss could be implemented here requiring history tracking
 
       return true;
    }
@@ -68,11 +67,11 @@ public:
 
       double tickSize = SymbolInfoDouble(symbol, SYMBOL_TRADE_TICK_SIZE);
       double tickValue = SymbolInfoDouble(symbol, SYMBOL_TRADE_TICK_VALUE);
-      double point = SymbolInfoDouble(symbol, SYMBOL_POINT);
 
       if(tickSize == 0 || tickValue == 0)
       {
-         if(m_logger) m_logger->LogError("RiskManager", "CalculateLotSize", "Invalid symbol info for " + symbol);
+         if(CheckPointer(m_logger) != POINTER_INVALID)
+            m_logger->LogError("RiskManager", "CalculateLotSize", "Invalid symbol info for " + symbol);
          return 0.0;
       }
 
@@ -115,7 +114,8 @@ public:
 
    void Deinitialize()
    {
-      if(m_logger) m_logger->LogInfo("RiskManager", "Deinitialize", "Deinitialized Risk Manager");
+      if(CheckPointer(m_logger) != POINTER_INVALID)
+         m_logger->LogInfo("RiskManager", "Deinitialize", "Deinitialized Risk Manager");
    }
 };
 

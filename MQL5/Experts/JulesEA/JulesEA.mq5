@@ -33,13 +33,8 @@ private:
    {
       // Magic number check is done in TradeExecutor::CloseAllPositions via filtering,
       // but PositionSelect just selects by symbol.
-      // To strictly check if *we* have an open position, we should iterate.
-      // However, PositionSelect(symbol) returns true if ANY position exists for that symbol.
-      // For this simple strategy, we assume one position per symbol per account or check magic.
       if(!PositionSelect(symbol)) return false;
 
-      // If selected, check Magic Number
-      // Note: PositionSelect relies on the platform selecting the position for further property access.
       long magic = PositionGetInteger(POSITION_MAGIC);
       // Hardcoded magic for Phase 1 (should match TradeExecutor default)
       return (magic == 123456);
@@ -54,17 +49,16 @@ public:
       m_symbol = _Symbol; // Bind to current chart
       m_timeframe = Period();
 
-      if(m_logger) m_logger->LogInfo("SimpleMAStrategy", "Initialize", "Initializing MA Strategy on " + m_symbol);
+      if(CheckPointer(m_logger) != POINTER_INVALID)
+         m_logger->LogInfo("SimpleMAStrategy", "Initialize", "Initializing MA Strategy on " + m_symbol);
 
-      // Initialize Indicators via standard MT5 functions (or use IndicatorManager wrapper if implemented fully)
-      // Ideally we use m_indicators->Register... but for this specific strategy logic we need handles.
-      // Let's use standard iMA for simplicity in this demo strategy
       m_maHandleFast = iMA(m_symbol, m_timeframe, m_fastMaPeriod, 0, MODE_SMA, PRICE_CLOSE);
       m_maHandleSlow = iMA(m_symbol, m_timeframe, m_slowMaPeriod, 0, MODE_SMA, PRICE_CLOSE);
 
       if(m_maHandleFast == INVALID_HANDLE || m_maHandleSlow == INVALID_HANDLE)
       {
-         if(m_logger) m_logger->LogError("SimpleMAStrategy", "Initialize", "Failed to create MA handles");
+         if(CheckPointer(m_logger) != POINTER_INVALID)
+            m_logger->LogError("SimpleMAStrategy", "Initialize", "Failed to create MA handles");
          return false;
       }
 
@@ -83,19 +77,12 @@ public:
          return;
       }
 
-      // Logic: Crossover
-      // Buy: Fast crosses above Slow (Fast[1] > Slow[1] && Fast[0] <= Slow[0] -> Wait, index 0 is current forming bar, index 1 is completed)
-      // Usually check closed bars: index 1 and 2.
-      // ArraySetAsSeries is default false for CopyBuffer unless set.
-      // Let's explicitly set as series
       ArraySetAsSeries(m_maFastVal, true);
       ArraySetAsSeries(m_maSlowVal, true);
 
       // Index 0 is current, 1 is previous closed
       // Bullish Cross: Fast[1] > Slow[1] AND Fast[2] <= Slow[2]
       // Bearish Cross: Fast[1] < Slow[1] AND Fast[2] >= Slow[2]
-      // We need 3 bars for crossover check
-      // Note: With ArraySetAsSeries(true), index 0 is the newest (timestamp-wise)
 
       bool isBuySignal = (m_maFastVal[1] > m_maSlowVal[1]) && (m_maFastVal[2] <= m_maSlowVal[2]);
       bool isSellSignal = (m_maFastVal[1] < m_maSlowVal[1]) && (m_maFastVal[2] >= m_maSlowVal[2]);
@@ -110,7 +97,8 @@ public:
          // Close Sells
          if(hasPosition && posType == POSITION_TYPE_SELL)
          {
-             m_executor->CloseAllPositions(m_symbol);
+             if(CheckPointer(m_executor) != POINTER_INVALID)
+                m_executor->CloseAllPositions(m_symbol);
              hasPosition = false; // Closed
          }
 
@@ -119,9 +107,11 @@ public:
          {
              double sl = tick.ask - 100 * _Point; // 100 points SL
              double tp = tick.ask + 200 * _Point; // 200 points TP
-             double lot = m_risk->CalculateLotSize(m_symbol, sl, tick.ask);
+             double lot = 0.0;
+             if(CheckPointer(m_risk) != POINTER_INVALID)
+                lot = m_risk->CalculateLotSize(m_symbol, sl, tick.ask);
 
-             if(lot > 0)
+             if(lot > 0 && CheckPointer(m_executor) != POINTER_INVALID)
                 m_executor->OpenTrade(m_symbol, ORDER_TYPE_BUY, lot, sl, tp, "MA Cross Buy");
          }
       }
@@ -130,7 +120,8 @@ public:
          // Close Buys
          if(hasPosition && posType == POSITION_TYPE_BUY)
          {
-             m_executor->CloseAllPositions(m_symbol);
+             if(CheckPointer(m_executor) != POINTER_INVALID)
+                m_executor->CloseAllPositions(m_symbol);
              hasPosition = false; // Closed
          }
 
@@ -139,9 +130,11 @@ public:
          {
              double sl = tick.bid + 100 * _Point;
              double tp = tick.bid - 200 * _Point;
-             double lot = m_risk->CalculateLotSize(m_symbol, sl, tick.bid);
+             double lot = 0.0;
+             if(CheckPointer(m_risk) != POINTER_INVALID)
+                lot = m_risk->CalculateLotSize(m_symbol, sl, tick.bid);
 
-             if(lot > 0)
+             if(lot > 0 && CheckPointer(m_executor) != POINTER_INVALID)
                 m_executor->OpenTrade(m_symbol, ORDER_TYPE_SELL, lot, sl, tp, "MA Cross Sell");
          }
       }
@@ -169,7 +162,7 @@ int OnInit()
 {
    g_engine = new CEAEngine();
 
-   if(!g_engine->Initialize())
+   if(CheckPointer(g_engine) == POINTER_INVALID || !g_engine->Initialize())
    {
       Print("Fatal Error: Engine failed to initialize");
       return INIT_FAILED;
@@ -192,7 +185,7 @@ int OnInit()
 //+------------------------------------------------------------------+
 void OnDeinit(const int reason)
 {
-   if(g_engine != NULL)
+   if(CheckPointer(g_engine) != POINTER_INVALID)
    {
       g_engine->Deinitialize();
       delete g_engine;
@@ -205,7 +198,7 @@ void OnDeinit(const int reason)
 //+------------------------------------------------------------------+
 void OnTick()
 {
-   if(g_engine != NULL)
+   if(CheckPointer(g_engine) != POINTER_INVALID)
    {
       g_engine->OnTick();
    }
@@ -216,7 +209,7 @@ void OnTick()
 //+------------------------------------------------------------------+
 void OnTrade()
 {
-   if(g_engine != NULL)
+   if(CheckPointer(g_engine) != POINTER_INVALID)
    {
       g_engine->OnTrade();
    }

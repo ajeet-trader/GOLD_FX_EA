@@ -36,9 +36,9 @@ public:
       m_trade.SetExpertMagicNumber(m_magicNumber);
       m_trade.SetDeviationInPoints(m_slippage);
       m_trade.SetTypeFilling(ORDER_FILLING_IOC); // IOC is safer than FOK for general use
-      // m_trade.SetAsyncMode(true); // For async handling, we start with synchronous for simplicity
 
-      if(m_logger) m_logger->LogInfo("TradeExecutor", "Initialize", StringFormat("Initialized with Magic: %d", m_magicNumber));
+      if(CheckPointer(m_logger) != POINTER_INVALID)
+         m_logger->LogInfo("TradeExecutor", "Initialize", StringFormat("Initialized with Magic: %d", m_magicNumber));
       return true;
    }
 
@@ -48,7 +48,8 @@ public:
       // Basic Validation
       if(volume <= 0)
       {
-         if(m_logger) m_logger->LogWarning("TradeExecutor", "OpenTrade", "Invalid volume: " + DoubleToString(volume, 2));
+         if(CheckPointer(m_logger) != POINTER_INVALID)
+            m_logger->LogWarning("TradeExecutor", "OpenTrade", "Invalid volume: " + DoubleToString(volume, 2));
          return false;
       }
 
@@ -58,7 +59,8 @@ public:
 
       if(price == 0.0)
       {
-         if(m_logger) m_logger->LogError("TradeExecutor", "OpenTrade", "Failed to get price for " + symbol);
+         if(CheckPointer(m_logger) != POINTER_INVALID)
+            m_logger->LogError("TradeExecutor", "OpenTrade", "Failed to get price for " + symbol);
          return false;
       }
 
@@ -75,13 +77,15 @@ public:
          {
             if(m_trade.ResultRetcode() == TRADE_RETCODE_DONE)
             {
-               if(m_logger) m_logger->LogInfo("TradeExecutor", "OpenTrade", StringFormat("Order Placed: %s %s Vol: %.2f Ticket: %d", symbol, EnumToString(type), volume, m_trade.ResultOrder()));
+               if(CheckPointer(m_logger) != POINTER_INVALID)
+                  m_logger->LogInfo("TradeExecutor", "OpenTrade", StringFormat("Order Placed: %s %s Vol: %.2f Ticket: %d", symbol, EnumToString(type), volume, m_trade.ResultOrder()));
                return true;
             }
          }
 
          // Log failure and retry
-         if(m_logger) m_logger->LogWarning("TradeExecutor", "OpenTrade", StringFormat("Attempt %d failed. Code: %d Desc: %s", i+1, m_trade.ResultRetcode(), m_trade.ResultRetcodeDescription()));
+         if(CheckPointer(m_logger) != POINTER_INVALID)
+            m_logger->LogWarning("TradeExecutor", "OpenTrade", StringFormat("Attempt %d failed. Code: %d Desc: %s", i+1, m_trade.ResultRetcode(), m_trade.ResultRetcodeDescription()));
          Sleep(100); // Wait 100ms before retry
 
          // Refresh price
@@ -89,7 +93,8 @@ public:
          else if(type == ORDER_TYPE_SELL) price = SymbolInfoDouble(symbol, SYMBOL_BID);
       }
 
-      if(m_logger) m_logger->LogError("TradeExecutor", "OpenTrade", "Final failure to open trade for " + symbol);
+      if(CheckPointer(m_logger) != POINTER_INVALID)
+         m_logger->LogError("TradeExecutor", "OpenTrade", "Final failure to open trade for " + symbol);
       return false;
    }
 

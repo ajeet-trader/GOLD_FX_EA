@@ -14,8 +14,7 @@
 #include "Logger.mqh"
 
 // Base class implementation for common indicator functionality
-// Removed IIndicator interface to avoid multiple inheritance issues.
-// All interface methods are now virtual methods in CIndicatorBase.
+// INHERITANCE FIX: Inherits ONLY from CObject to avoid multiple inheritance issues.
 class CIndicatorBase : public CObject
 {
 protected:
@@ -72,12 +71,6 @@ class CIndicatorManager
 private:
    CArrayObj m_indicators; // Stores CIndicatorBase pointers
    CLogger* m_logger;
-
-   struct IndicatorCache {
-       string name;
-       datetime lastUpdate;
-       double value; // Cached value for index 0
-   };
 
 public:
    CIndicatorManager(CLogger* logger) : m_logger(logger)
