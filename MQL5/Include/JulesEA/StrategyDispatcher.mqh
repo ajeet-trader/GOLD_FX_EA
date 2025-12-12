@@ -16,18 +16,9 @@
 #include "RiskManager.mqh"
 #include "IndicatorManager.mqh"
 
-// Core Module Interface
-interface IModule
-{
-    bool Initialize(string params);
-    void ProcessTick(MqlTick &tick);
-    void Deinitialize();
-    string GetModuleInfo();
-    string GetSymbol(); // Added to route ticks correctly
-};
-
 // Base Strategy Class to simplify implementations
-class CStrategyBase : public CObject, public IModule
+// Removed IModule interface to avoid multiple inheritance issues.
+class CStrategyBase : public CObject
 {
 protected:
     string m_symbol;
@@ -50,6 +41,7 @@ public:
         m_logger = logger;
     }
 
+    // Interface methods directly in Base Class
     virtual bool Initialize(string params)
     {
        m_initialized = true;
@@ -92,14 +84,14 @@ public:
 
    bool Initialize()
    {
-      if(m_logger) m_logger->LogInfo("StrategyDispatcher", "Initialize", "Initializing Strategy Dispatcher");
+      if(CheckPointer(m_logger) != POINTER_INVALID)
+         m_logger->LogInfo("StrategyDispatcher", "Initialize", "Initializing Strategy Dispatcher");
       return true;
    }
 
    bool RegisterStrategy(CStrategyBase* strategy)
    {
-      if(strategy == NULL) return false;
-      if(m_logger == NULL) return false;
+      if(CheckPointer(strategy) == POINTER_INVALID) return false;
 
       // Inject dependencies
       strategy->SetDependencies(m_indicatorManager, m_riskManager, m_tradeExecutor, m_logger);
@@ -107,13 +99,15 @@ public:
       // Initialize strategy
       if(!strategy->Initialize(""))
       {
-         m_logger->LogError("StrategyDispatcher", "RegisterStrategy", "Failed to initialize strategy: " + strategy->GetModuleInfo());
+         if(CheckPointer(m_logger) != POINTER_INVALID)
+            m_logger->LogError("StrategyDispatcher", "RegisterStrategy", "Failed to initialize strategy: " + strategy->GetModuleInfo());
          return false;
       }
 
       if(m_strategies.Add(strategy))
       {
-         m_logger->LogInfo("StrategyDispatcher", "RegisterStrategy", "Registered strategy: " + strategy->GetModuleInfo());
+         if(CheckPointer(m_logger) != POINTER_INVALID)
+            m_logger->LogInfo("StrategyDispatcher", "RegisterStrategy", "Registered strategy: " + strategy->GetModuleInfo());
          return true;
       }
       return false;
@@ -128,7 +122,7 @@ public:
       {
          CStrategyBase* strategy = (CStrategyBase*)m_strategies.At(i);
          // Only process if symbol matches
-         if(strategy != NULL && strategy->GetSymbol() == symbol)
+         if(CheckPointer(strategy) != POINTER_INVALID && strategy->GetSymbol() == symbol)
          {
             strategy->ProcessTick(tick);
          }
@@ -137,11 +131,14 @@ public:
 
    void Deinitialize()
    {
-      if(m_logger) m_logger->LogInfo("StrategyDispatcher", "Deinitialize", "Deinitializing all strategies");
+      if(CheckPointer(m_logger) != POINTER_INVALID)
+         m_logger->LogInfo("StrategyDispatcher", "Deinitialize", "Deinitializing all strategies");
+
       for(int i=0; i<m_strategies.Total(); i++)
       {
          CStrategyBase* strategy = (CStrategyBase*)m_strategies.At(i);
-         if(strategy != NULL) strategy->Deinitialize();
+         if(CheckPointer(strategy) != POINTER_INVALID)
+            strategy->Deinitialize();
       }
       m_strategies.Clear();
    }
