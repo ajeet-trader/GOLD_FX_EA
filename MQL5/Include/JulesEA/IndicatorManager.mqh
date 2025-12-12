@@ -14,7 +14,6 @@
 #include "Logger.mqh"
 
 // Base class implementation for common indicator functionality
-// INHERITANCE FIX: Inherits ONLY from CObject to avoid multiple inheritance issues.
 class CIndicatorBase : public CObject
 {
 protected:
@@ -85,18 +84,18 @@ public:
 
    bool Initialize()
    {
-      if(CheckPointer(m_logger) != POINTER_INVALID)
+      if(m_logger != NULL)
          m_logger->LogInfo("IndicatorManager", "Initialize", "Initializing Indicator Manager");
       return true;
    }
 
    bool RegisterIndicator(CIndicatorBase* indicator)
    {
-      if(CheckPointer(indicator) == POINTER_INVALID) return false;
+      if(indicator == NULL) return false;
 
       if(m_indicators.Add(indicator))
       {
-         if(CheckPointer(m_logger) != POINTER_INVALID)
+         if(m_logger != NULL)
             m_logger->LogInfo("IndicatorManager", "RegisterIndicator", "Registered indicator: " + indicator->GetName());
          return true;
       }
@@ -109,11 +108,11 @@ public:
       for(int i=0; i<m_indicators.Total(); i++)
       {
          CIndicatorBase* ind = (CIndicatorBase*)m_indicators.At(i);
-         if(CheckPointer(ind) != POINTER_INVALID)
+         if(ind != NULL)
          {
             if(!ind->Update())
             {
-               if(CheckPointer(m_logger) != POINTER_INVALID)
+               if(m_logger != NULL)
                   m_logger->LogWarning("IndicatorManager", "UpdateAllIndicators", "Failed to update " + ind->GetName());
                allSuccess = false;
             }
@@ -128,7 +127,7 @@ public:
       for(int i=0; i<m_indicators.Total(); i++)
       {
          CIndicatorBase* ind = (CIndicatorBase*)m_indicators.At(i);
-         if(CheckPointer(ind) != POINTER_INVALID && ind->GetName() == name)
+         if(ind != NULL && ind->GetName() == name)
             return ind;
       }
       return NULL;
@@ -137,19 +136,19 @@ public:
    double GetIndicatorValue(string name, int index, int buffer = 0)
    {
       CIndicatorBase* ind = GetIndicator(name);
-      if(CheckPointer(ind) != POINTER_INVALID)
+      if(ind != NULL)
       {
          return ind->GetValue(index, buffer);
       }
 
-      if(CheckPointer(m_logger) != POINTER_INVALID)
+      if(m_logger != NULL)
          m_logger->LogError("IndicatorManager", "GetIndicatorValue", "Indicator not found: " + name);
       return 0.0;
    }
 
    void Deinitialize()
    {
-      if(CheckPointer(m_logger) != POINTER_INVALID)
+      if(m_logger != NULL)
          m_logger->LogInfo("IndicatorManager", "Deinitialize", "Deinitializing Indicator Manager");
       m_indicators.Clear();
    }

@@ -68,8 +68,6 @@ public:
          // Reset error state
          ResetLastError();
          // Open file for writing (shared read/write, common folder or local)
-         // Using FILE_COMMON allows sharing between terminals, but for specific EA usually local is fine.
-         // Let's use local MQL5/Files folder.
          m_fileHandle = FileOpen(m_fileName, FILE_WRITE|FILE_CSV|FILE_ANSI|FILE_SHARE_READ, "\t");
 
          if(m_fileHandle == INVALID_HANDLE)

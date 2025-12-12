@@ -49,7 +49,7 @@ public:
       m_symbol = _Symbol; // Bind to current chart
       m_timeframe = Period();
 
-      if(CheckPointer(m_logger) != POINTER_INVALID)
+      if(m_logger != NULL)
          m_logger->LogInfo("SimpleMAStrategy", "Initialize", "Initializing MA Strategy on " + m_symbol);
 
       m_maHandleFast = iMA(m_symbol, m_timeframe, m_fastMaPeriod, 0, MODE_SMA, PRICE_CLOSE);
@@ -57,7 +57,7 @@ public:
 
       if(m_maHandleFast == INVALID_HANDLE || m_maHandleSlow == INVALID_HANDLE)
       {
-         if(CheckPointer(m_logger) != POINTER_INVALID)
+         if(m_logger != NULL)
             m_logger->LogError("SimpleMAStrategy", "Initialize", "Failed to create MA handles");
          return false;
       }
@@ -97,7 +97,7 @@ public:
          // Close Sells
          if(hasPosition && posType == POSITION_TYPE_SELL)
          {
-             if(CheckPointer(m_executor) != POINTER_INVALID)
+             if(m_executor != NULL)
                 m_executor->CloseAllPositions(m_symbol);
              hasPosition = false; // Closed
          }
@@ -108,10 +108,10 @@ public:
              double sl = tick.ask - 100 * _Point; // 100 points SL
              double tp = tick.ask + 200 * _Point; // 200 points TP
              double lot = 0.0;
-             if(CheckPointer(m_risk) != POINTER_INVALID)
+             if(m_risk != NULL)
                 lot = m_risk->CalculateLotSize(m_symbol, sl, tick.ask);
 
-             if(lot > 0 && CheckPointer(m_executor) != POINTER_INVALID)
+             if(lot > 0 && m_executor != NULL)
                 m_executor->OpenTrade(m_symbol, ORDER_TYPE_BUY, lot, sl, tp, "MA Cross Buy");
          }
       }
@@ -120,7 +120,7 @@ public:
          // Close Buys
          if(hasPosition && posType == POSITION_TYPE_BUY)
          {
-             if(CheckPointer(m_executor) != POINTER_INVALID)
+             if(m_executor != NULL)
                 m_executor->CloseAllPositions(m_symbol);
              hasPosition = false; // Closed
          }
@@ -131,10 +131,10 @@ public:
              double sl = tick.bid + 100 * _Point;
              double tp = tick.bid - 200 * _Point;
              double lot = 0.0;
-             if(CheckPointer(m_risk) != POINTER_INVALID)
+             if(m_risk != NULL)
                 lot = m_risk->CalculateLotSize(m_symbol, sl, tick.bid);
 
-             if(lot > 0 && CheckPointer(m_executor) != POINTER_INVALID)
+             if(lot > 0 && m_executor != NULL)
                 m_executor->OpenTrade(m_symbol, ORDER_TYPE_SELL, lot, sl, tp, "MA Cross Sell");
          }
       }
@@ -162,7 +162,7 @@ int OnInit()
 {
    g_engine = new CEAEngine();
 
-   if(CheckPointer(g_engine) == POINTER_INVALID || !g_engine->Initialize())
+   if(g_engine == NULL || !g_engine->Initialize())
    {
       Print("Fatal Error: Engine failed to initialize");
       return INIT_FAILED;
@@ -185,7 +185,7 @@ int OnInit()
 //+------------------------------------------------------------------+
 void OnDeinit(const int reason)
 {
-   if(CheckPointer(g_engine) != POINTER_INVALID)
+   if(g_engine != NULL)
    {
       g_engine->Deinitialize();
       delete g_engine;
@@ -198,7 +198,7 @@ void OnDeinit(const int reason)
 //+------------------------------------------------------------------+
 void OnTick()
 {
-   if(CheckPointer(g_engine) != POINTER_INVALID)
+   if(g_engine != NULL)
    {
       g_engine->OnTick();
    }
@@ -209,7 +209,7 @@ void OnTick()
 //+------------------------------------------------------------------+
 void OnTrade()
 {
-   if(CheckPointer(g_engine) != POINTER_INVALID)
+   if(g_engine != NULL)
    {
       g_engine->OnTrade();
    }

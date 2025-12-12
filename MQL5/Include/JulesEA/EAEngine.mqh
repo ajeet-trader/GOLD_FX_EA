@@ -46,7 +46,7 @@ public:
        // 1. Initialize Logger
        m_logger = new CLogger();
        // Using standard local file "JulesEA_Log.csv"
-       if(CheckPointer(m_logger) != POINTER_INVALID)
+       if(m_logger != NULL)
        {
           if(!m_logger->Initialize("JulesEA_Log.csv", LOG_LEVEL_INFO))
           {
@@ -63,21 +63,21 @@ public:
 
        // 2. Initialize Components
        m_indicatorManager = new CIndicatorManager(m_logger);
-       if(CheckPointer(m_indicatorManager) != POINTER_INVALID)
+       if(m_indicatorManager != NULL)
        {
           if(!m_indicatorManager->Initialize()) return false;
        }
        else return false;
 
        m_riskManager = new CRiskManager(m_logger);
-       if(CheckPointer(m_riskManager) != POINTER_INVALID)
+       if(m_riskManager != NULL)
        {
           if(!m_riskManager->Initialize()) return false;
        }
        else return false;
 
        m_tradeExecutor = new CTradeExecutor(m_logger);
-       if(CheckPointer(m_tradeExecutor) != POINTER_INVALID)
+       if(m_tradeExecutor != NULL)
        {
           if(!m_tradeExecutor->Initialize(123456)) return false; // Magic number could be param
        }
@@ -85,14 +85,14 @@ public:
 
        // 3. Initialize Strategy Dispatcher
        m_strategyDispatcher = new CStrategyDispatcher(m_logger, m_indicatorManager, m_riskManager, m_tradeExecutor);
-       if(CheckPointer(m_strategyDispatcher) != POINTER_INVALID)
+       if(m_strategyDispatcher != NULL)
        {
           if(!m_strategyDispatcher->Initialize()) return false;
        }
        else return false;
 
        m_initialized = true;
-       if(CheckPointer(m_logger) != POINTER_INVALID)
+       if(m_logger != NULL)
           m_logger->LogInfo("EAEngine", "Initialize", "Initialization complete.");
        return true;
     }
@@ -100,7 +100,7 @@ public:
     // Allow registering strategies externally (e.g. from main .mq5)
     bool RegisterStrategy(CStrategyBase* strategy)
     {
-       if(!m_initialized || CheckPointer(m_strategyDispatcher) == POINTER_INVALID) return false;
+       if(!m_initialized || m_strategyDispatcher == NULL) return false;
        return m_strategyDispatcher->RegisterStrategy(strategy);
     }
 
@@ -109,11 +109,11 @@ public:
        if(!m_initialized) return;
 
        // Update all indicators first
-       if(CheckPointer(m_indicatorManager) != POINTER_INVALID)
+       if(m_indicatorManager != NULL)
           m_indicatorManager->UpdateAllIndicators();
 
        // Process Strategy Logic for the current symbol
-       if(CheckPointer(m_strategyDispatcher) != POINTER_INVALID)
+       if(m_strategyDispatcher != NULL)
           m_strategyDispatcher->ProcessTick(_Symbol);
     }
 
@@ -129,16 +129,16 @@ public:
 
     void Deinitialize()
     {
-       if(CheckPointer(m_logger) != POINTER_INVALID)
+       if(m_logger != NULL)
           m_logger->LogInfo("EAEngine", "Deinitialize", "Shutting down...");
 
-       if(CheckPointer(m_strategyDispatcher) != POINTER_INVALID) { delete m_strategyDispatcher; m_strategyDispatcher = NULL; }
-       if(CheckPointer(m_tradeExecutor) != POINTER_INVALID) { delete m_tradeExecutor; m_tradeExecutor = NULL; }
-       if(CheckPointer(m_riskManager) != POINTER_INVALID) { delete m_riskManager; m_riskManager = NULL; }
-       if(CheckPointer(m_indicatorManager) != POINTER_INVALID) { delete m_indicatorManager; m_indicatorManager = NULL; }
+       if(m_strategyDispatcher != NULL) { delete m_strategyDispatcher; m_strategyDispatcher = NULL; }
+       if(m_tradeExecutor != NULL) { delete m_tradeExecutor; m_tradeExecutor = NULL; }
+       if(m_riskManager != NULL) { delete m_riskManager; m_riskManager = NULL; }
+       if(m_indicatorManager != NULL) { delete m_indicatorManager; m_indicatorManager = NULL; }
 
        // Delete logger last
-       if(CheckPointer(m_logger) != POINTER_INVALID) { delete m_logger; m_logger = NULL; }
+       if(m_logger != NULL) { delete m_logger; m_logger = NULL; }
 
        m_initialized = false;
     }

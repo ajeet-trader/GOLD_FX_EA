@@ -34,7 +34,7 @@ public:
    bool Initialize()
    {
       m_initialBalance = AccountInfoDouble(ACCOUNT_BALANCE);
-      if(CheckPointer(m_logger) != POINTER_INVALID)
+      if(m_logger != NULL)
          m_logger->LogInfo("RiskManager", "Initialize", StringFormat("Initialized with Balance: %.2f", m_initialBalance));
       return true;
    }
@@ -49,7 +49,7 @@ public:
 
       if(drawdown >= m_maxDrawdownPercent)
       {
-         if(CheckPointer(m_logger) != POINTER_INVALID)
+         if(m_logger != NULL)
             m_logger->LogCritical("RiskManager", "IsTradingAllowed", StringFormat("Max Drawdown exceeded! Current: %.2f%%, Max: %.2f%%", drawdown, m_maxDrawdownPercent));
          return false;
       }
@@ -70,7 +70,7 @@ public:
 
       if(tickSize == 0 || tickValue == 0)
       {
-         if(CheckPointer(m_logger) != POINTER_INVALID)
+         if(m_logger != NULL)
             m_logger->LogError("RiskManager", "CalculateLotSize", "Invalid symbol info for " + symbol);
          return 0.0;
       }
@@ -114,7 +114,7 @@ public:
 
    void Deinitialize()
    {
-      if(CheckPointer(m_logger) != POINTER_INVALID)
+      if(m_logger != NULL)
          m_logger->LogInfo("RiskManager", "Deinitialize", "Deinitialized Risk Manager");
    }
 };

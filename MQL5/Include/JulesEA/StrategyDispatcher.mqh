@@ -17,8 +17,7 @@
 #include "IndicatorManager.mqh"
 
 // Base Strategy Class to simplify implementations
-// INHERITANCE FIX: Inherits ONLY from CObject to avoid multiple inheritance issues.
-// Removed IModule interface.
+// Inherits ONLY from CObject to avoid multiple inheritance issues.
 class CStrategyBase : public CObject
 {
 protected:
@@ -85,14 +84,14 @@ public:
 
    bool Initialize()
    {
-      if(CheckPointer(m_logger) != POINTER_INVALID)
+      if(m_logger != NULL)
          m_logger->LogInfo("StrategyDispatcher", "Initialize", "Initializing Strategy Dispatcher");
       return true;
    }
 
    bool RegisterStrategy(CStrategyBase* strategy)
    {
-      if(CheckPointer(strategy) == POINTER_INVALID) return false;
+      if(strategy == NULL) return false;
 
       // Inject dependencies
       strategy->SetDependencies(m_indicatorManager, m_riskManager, m_tradeExecutor, m_logger);
@@ -100,14 +99,14 @@ public:
       // Initialize strategy
       if(!strategy->Initialize(""))
       {
-         if(CheckPointer(m_logger) != POINTER_INVALID)
+         if(m_logger != NULL)
             m_logger->LogError("StrategyDispatcher", "RegisterStrategy", "Failed to initialize strategy: " + strategy->GetModuleInfo());
          return false;
       }
 
       if(m_strategies.Add(strategy))
       {
-         if(CheckPointer(m_logger) != POINTER_INVALID)
+         if(m_logger != NULL)
             m_logger->LogInfo("StrategyDispatcher", "RegisterStrategy", "Registered strategy: " + strategy->GetModuleInfo());
          return true;
       }
@@ -123,7 +122,7 @@ public:
       {
          CStrategyBase* strategy = (CStrategyBase*)m_strategies.At(i);
          // Only process if symbol matches
-         if(CheckPointer(strategy) != POINTER_INVALID && strategy->GetSymbol() == symbol)
+         if(strategy != NULL && strategy->GetSymbol() == symbol)
          {
             strategy->ProcessTick(tick);
          }
@@ -132,13 +131,13 @@ public:
 
    void Deinitialize()
    {
-      if(CheckPointer(m_logger) != POINTER_INVALID)
+      if(m_logger != NULL)
          m_logger->LogInfo("StrategyDispatcher", "Deinitialize", "Deinitializing all strategies");
 
       for(int i=0; i<m_strategies.Total(); i++)
       {
          CStrategyBase* strategy = (CStrategyBase*)m_strategies.At(i);
-         if(CheckPointer(strategy) != POINTER_INVALID)
+         if(strategy != NULL)
             strategy->Deinitialize();
       }
       m_strategies.Clear();
