@@ -9,6 +9,7 @@
 #include <GoldFXEAProject/Utils/Logger.mqh>
 #include <GoldFXEAProject/Core/RiskManager.mqh>
 #include <GoldFXEAProject/Core/TradeExecutor.mqh>
+#include <GoldFXEAProject/Core/SymbolManager.mqh>
 #include <GoldFXEAProject/Strategies/StrategyDispatcher.mqh>
 
 // Include all strategies
@@ -201,7 +202,7 @@ public:
             CEURUSDTrendFollowing* eurusdStrategy = new CEURUSDTrendFollowing(m_logger, m_riskManager);
             
             StrategyConfig strategyConfig;
-            strategyConfig.symbol = "EURUSD";
+            strategyConfig.symbol = CSymbolManager::GetCorrectSymbol("EURUSD");
             strategyConfig.timeframe = PERIOD_H1;
             strategyConfig.strategyType = STRATEGY_TREND_FOLLOWING;
             strategyConfig.riskPercent = 1.5;
@@ -232,7 +233,7 @@ public:
             CGBPUSDBreakout* gbpusdStrategy = new CGBPUSDBreakout(m_logger, m_riskManager);
             
             StrategyConfig strategyConfig;
-            strategyConfig.symbol = "GBPUSD";
+            strategyConfig.symbol = CSymbolManager::GetCorrectSymbol("GBPUSD");
             strategyConfig.timeframe = PERIOD_M30;
             strategyConfig.strategyType = STRATEGY_BREAKOUT;
             strategyConfig.riskPercent = 2.0;
@@ -263,7 +264,7 @@ public:
             CBTCUSDMomentum* btcStrategy = new CBTCUSDMomentum(m_logger, m_riskManager);
             
             StrategyConfig strategyConfig;
-            strategyConfig.symbol = "BTCUSD";
+            strategyConfig.symbol = CSymbolManager::GetCorrectSymbol("BTCUSD");
             strategyConfig.timeframe = PERIOD_M30;
             strategyConfig.strategyType = STRATEGY_MOMENTUM;
             strategyConfig.riskPercent = 1.0;  // Lower risk for crypto
@@ -294,7 +295,7 @@ public:
             CXAUUSDScalping* goldStrategy = new CXAUUSDScalping(m_logger, m_riskManager);
             
             StrategyConfig strategyConfig;
-            strategyConfig.symbol = "XAUUSD";
+            strategyConfig.symbol = CSymbolManager::GetCorrectSymbol("XAUUSD");
             strategyConfig.timeframe = PERIOD_M15;
             strategyConfig.strategyType = STRATEGY_SCALPING;
             strategyConfig.riskPercent = 1.0;
