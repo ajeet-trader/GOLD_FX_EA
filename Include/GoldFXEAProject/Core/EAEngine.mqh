@@ -17,6 +17,7 @@
 #include <GoldFXEAProject/Strategies/Forex/GBPUSDBreakout.mqh>
 #include <GoldFXEAProject/Strategies/Crypto/BTCUSDMomentum.mqh>
 #include <GoldFXEAProject/Strategies/Metals/XAUUSDScalping.mqh>
+#include <GoldFXEAProject/Strategies/Indices/SP500MeanReversion.mqh>
 
 //+------------------------------------------------------------------+
 //| CEAEngine Class                                                  |
@@ -316,6 +317,37 @@ public:
                 m_logger.Error("✗ Failed to register XAUUSD Scalping strategy", "EAEngine");
                 Print("    ✗ XAUUSD M15 Scalping Failed");
                 delete goldStrategy;
+            }
+        }
+        
+        // 5. SP500 Mean Reversion Strategy (Indices)
+        if(m_config.enableIndices)
+        {
+            Print("  → Registering SP500 Mean Reversion...");
+            CSP500MeanReversion* sp500Strategy = new CSP500MeanReversion(m_logger, m_riskManager);
+            
+            StrategyConfig strategyConfig;
+            strategyConfig.symbol = CSymbolManager::GetCorrectSymbol("SP500");
+            strategyConfig.timeframe = PERIOD_H1;
+            strategyConfig.strategyType = STRATEGY_MEAN_REVERSION;
+            strategyConfig.riskPercent = 1.0;
+            strategyConfig.maxOpenTrades = 1;
+            strategyConfig.enableTrading = true;
+            strategyConfig.magicNumber = EA_MAGIC_NUMBER + 5;
+            
+            sp500Strategy.SetConfig(strategyConfig);
+            
+            if(m_strategyDispatcher.RegisterStrategy(sp500Strategy))
+            {
+                m_logger.Info("✓ SP500 Mean Reversion strategy registered", "EAEngine");
+                Print("    ✓ SP500 H1 Mean Reversion Active");
+                registeredCount++;
+            }
+            else
+            {
+                m_logger.Error("✗ Failed to register SP500 Mean Reversion strategy", "EAEngine");
+                Print("    ✗ SP500 H1 Mean Reversion Failed");
+                delete sp500Strategy;
             }
         }
         

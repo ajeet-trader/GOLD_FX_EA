@@ -77,6 +77,7 @@ struct EAConfig
     bool enableBreakout;
     bool enableMeanReversion;
     bool enableScalping;
+    bool enableIndices;
     
     // Constructor with default values
     EAConfig()
@@ -92,6 +93,7 @@ struct EAConfig
         enableBreakout = false;
         enableMeanReversion = false;
         enableScalping = false;
+        enableIndices = false;
     }
 };
 

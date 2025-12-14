@@ -47,12 +47,24 @@
    - **Logic**: 5/13 EMA cross + Stochastic in extremes + Low ATR environment
    - **Risk**: 1% per trade, max 2 positions
 
+5. **SP500MeanReversion.mqh** - Indices Mean Reversion Strategy
+   - **Symbol**: SP500
+   - **Timeframe**: H1
+   - **Logic**: BB extremes + RSI oversold/overbought
+   - **Risk**: 1% per trade
+
 ### ✅ Updated Core Engine
 
 - **EAEngine.mqh** - Now integrates Strategy Dispatcher
 - Automatic strategy registration based on EA configuration
 - Multi-strategy tick processing
 - Enhanced logging for strategy events
+
+### ✅ Broker Agnostic Symbol Discovery
+
+- **SymbolManager.mqh** - A new core utility to handle broker-specific symbol names.
+- **How it works:** Before a strategy is initialized, the engine asks the `SymbolManager` to find the correct symbol. It takes a base symbol (e.g., "EURUSD") and tries common variations (e.g., "EURUSDm", "EURUSD.pro") until it finds one that is valid on the broker's server.
+- **Benefit:** This makes the EA automatically adapt to different brokers, eliminating "Invalid Symbol" errors and removing the need for manual configuration.
 
 ---
 
@@ -78,7 +90,8 @@ MQL5/
 │       ├── Core/
 │       │   ├── EAEngine.mqh                [UPDATED]
 │       │   ├── RiskManager.mqh             [Existing]
-│       │   └── TradeExecutor.mqh           [Existing]
+│       │   ├── TradeExecutor.mqh           [Existing]
+│       │   └── SymbolManager.mqh           [NEW]
 │       │
 │       └── Strategies/
 │           ├── IStrategy.mqh               [NEW]
@@ -94,6 +107,9 @@ MQL5/
 │           │
 │           └── Metals/
 │               └── XAUUSDScalping.mqh     [NEW]
+│
+│           └── Indices/
+│               └── SP500MeanReversion.mqh [NEW]
 ```
 
 ---
@@ -109,6 +125,7 @@ MQL5/Include/GoldFXEAProject/Strategies/
 MQL5/Include/GoldFXEAProject/Strategies/Forex/
 MQL5/Include/GoldFXEAProject/Strategies/Crypto/
 MQL5/Include/GoldFXEAProject/Strategies/Metals/
+MQL5/Include/GoldFXEAProject/Strategies/Indices/
 ```
 
 ### Step 2: Add New Files
@@ -130,6 +147,9 @@ Place the following files in their respective directories:
 **In `/Include/GoldFXEAProject/Strategies/Metals/`:**
 - XAUUSDScalping.mqh
 
+**In `/Include/GoldFXEAProject/Strategies/Indices/`:**
+- SP500MeanReversion.mqh
+
 **Replace in `/Include/GoldFXEAProject/Core/`:**
 - EAEngine.mqh (with updated version)
 
@@ -143,6 +163,7 @@ input bool     EnableTrendFollowing = true;       // EURUSD H1 Trend
 input bool     EnableBreakout = false;            // GBPUSD M30 Breakout
 input bool     EnableMeanReversion = false;       // BTCUSD M30 Momentum
 input bool     EnableScalping = false;            // XAUUSD M15 Scalping
+input bool     EnableIndices = false;             // SP500 H1 Mean Reversion
 ```
 
 ### Step 4: Compile
@@ -186,6 +207,11 @@ Test each of the 4 strategies individually to validate their logic and baseline 
 - **EA Inputs**: `EnableScalping = true`, all others `false`.
 - **Chart**: XAUUSD, M15
 - **Success Criteria**: PF > 1.4, Max DD < 20%, Win Rate > 48%
+
+#### Test 5: SP500 Mean Reversion
+- **EA Inputs**: `EnableIndices = true`, all others `false`.
+- **Chart**: SP500, H1
+- **Success Criteria**: PF > 1.4, Max DD < 20%, Win Rate > 55%
 
 ### Phase 2.2: Multi-Strategy Portfolio Testing (Week 2)
 
@@ -410,12 +436,14 @@ With the foundation and initial Forex strategies complete, the expansion focuses
    - Logic: EMA(5/13) + Stochastic + Low ATR
    - Timeframe: M15
 
-### To Be Implemented:
-
-1. **SP500 Mean Reversion** (Indices)
+3. **SP500 Mean Reversion** (Indices)
    - File: `/Strategies/Indices/SP500MeanReversion.mqh`
    - Logic: BB extremes + RSI oversold/overbought
-   - Timeframe: M30/H1
+   - Timeframe: H1
+
+### To Be Implemented:
+
+1. **[Next Strategy TBD]** (e.g., NASDAQ Breakout)
 
 ---
 
@@ -431,13 +459,15 @@ Before moving to Phase 3, verify:
 - [x] GBPUSD Breakout strategy complete
 - [x] BTCUSD Momentum strategy complete
 - [x] XAUUSD Scalping strategy complete
-- [x] EAEngine updated with 4-strategy integration
+- [x] SP500 Mean Reversion strategy complete
+- [x] EAEngine updated with 5-strategy integration
 
 ### Testing
 - [ ] EURUSD backtest passed (PF > 1.3)
 - [ ] GBPUSD backtest passed (PF > 1.3)
 - [ ] BTCUSD backtest passed (PF > 1.3)
 - [ ] XAUUSD backtest passed (PF > 1.4)
+- [ ] SP500 backtest passed (PF > 1.4)
 - [ ] Full portfolio backtest successful
 - [ ] No strategy conflicts detected
 - [ ] Forward test running for 4+ weeks

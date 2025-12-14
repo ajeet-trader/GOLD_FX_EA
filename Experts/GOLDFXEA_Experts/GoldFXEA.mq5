@@ -31,6 +31,7 @@ input bool     EnableTrendFollowing = true;       // Enable Trend Following
 input bool     EnableBreakout = false;            // Enable Breakout
 input bool     EnableMeanReversion = false;       // Enable Mean Reversion
 input bool     EnableScalping = false;            // Enable Scalping
+input bool     EnableIndices = false;             // Enable Indices Trading
 
 //+------------------------------------------------------------------+
 //| Global Variables                                                  |
@@ -70,6 +71,7 @@ int OnInit()
     config.enableBreakout = EnableBreakout;
     config.enableMeanReversion = EnableMeanReversion;
     config.enableScalping = EnableScalping;
+    config.enableIndices = EnableIndices;
     
     // Initialize EA engine
     if(!g_engine.Initialize(config))

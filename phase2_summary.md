@@ -24,6 +24,11 @@
    - Risk: 1% per trade, Max 2 positions
    - Magic: 20251217
 
+5. **SP500MeanReversion.mqh** (Indices H1)
+   - Bollinger Bands (20,2) + RSI(14)
+   - Risk: 1% per trade
+   - Magic: 20251218
+
 ---
 
 ## 📂 Complete Directory Structure
@@ -46,8 +51,12 @@ MQL5/
 │   │   └── Metals/
 │   │       └── XAUUSDScalping.mqh
 │   │
+│   │   └── Indices/
+│   │       └── SP500MeanReversion.mqh
+│   │
 │   └── Core/
-│       └── EAEngine.mqh (UPDATED)
+│       ├── EAEngine.mqh (UPDATED)
+│       └── SymbolManager.mqh (NEW)
 ```
 
 ---
