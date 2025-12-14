@@ -9,6 +9,10 @@
 #include <GoldFXEAProject/Utils/Logger.mqh>
 #include <GoldFXEAProject/Core/RiskManager.mqh>
 #include <GoldFXEAProject/Core/TradeExecutor.mqh>
+#include <GoldFXEAProject/Strategies/StrategyDispatcher.mqh>
+
+// Include strategies
+#include <GoldFXEAProject/Strategies/Forex/EURUSDTrendFollowing.mqh>
 
 //+------------------------------------------------------------------+
 //| CEAEngine Class                                                  |
@@ -21,6 +25,7 @@ private:
     CLogger* m_logger;
     CRiskManager* m_riskManager;
     CTradeExecutor* m_tradeExecutor;
+    CStrategyDispatcher* m_strategyDispatcher;
     
     // Configuration
     EAConfig m_config;
@@ -41,6 +46,7 @@ public:
         m_logger = NULL;
         m_riskManager = NULL;
         m_tradeExecutor = NULL;
+        m_strategyDispatcher = NULL;
         m_initialized = false;
         m_lastTickTime = 0;
         m_tickCount = 0;
@@ -58,12 +64,13 @@ public:
     {
         Print("╔════════════════════════════════════════════════════════════╗");
         Print("║          Initializing GoldFXEA Core Engine                ║");
+        Print("║                    PHASE 2: Strategies                     ║");
         Print("╚════════════════════════════════════════════════════════════╝");
         
         m_config = config;
         
         // Step 1: Initialize Logger
-        Print("→ Step 1/3: Initializing Logger...");
+        Print("→ Step 1/4: Initializing Logger...");
         m_logger = new CLogger(config.logLevel, config.enableLogging, true);
         
         if(m_logger == NULL)
@@ -84,7 +91,7 @@ public:
         Print("✓ Logger initialized");
         
         // Step 2: Initialize Risk Manager
-        Print("→ Step 2/3: Initializing Risk Manager...");
+        Print("→ Step 2/4: Initializing Risk Manager...");
         m_riskManager = new CRiskManager(m_logger);
         
         if(m_riskManager == NULL)
@@ -108,7 +115,7 @@ public:
         Print("✓ Risk Manager initialized");
         
         // Step 3: Initialize Trade Executor
-        Print("→ Step 3/3: Initializing Trade Executor...");
+        Print("→ Step 3/4: Initializing Trade Executor...");
         m_tradeExecutor = new CTradeExecutor(m_logger, m_riskManager);
         
         if(m_tradeExecutor == NULL)
@@ -128,6 +135,32 @@ public:
         m_logger.Info("Trade Executor initialized successfully", "EAEngine");
         Print("✓ Trade Executor initialized");
         
+        // Step 4: Initialize Strategy Dispatcher
+        Print("→ Step 4/4: Initializing Strategy Dispatcher...");
+        m_strategyDispatcher = new CStrategyDispatcher(m_logger, m_riskManager, m_tradeExecutor);
+        
+        if(m_strategyDispatcher == NULL)
+        {
+            m_logger.Critical("Failed to create StrategyDispatcher instance", "EAEngine");
+            return false;
+        }
+        
+        if(!m_strategyDispatcher.Initialize())
+        {
+            m_logger.Critical("Failed to initialize StrategyDispatcher", "EAEngine");
+            return false;
+        }
+        
+        m_logger.Info("Strategy Dispatcher initialized successfully", "EAEngine");
+        Print("✓ Strategy Dispatcher initialized");
+        
+        // Register strategies based on config
+        if(!RegisterStrategies())
+        {
+            m_logger.Critical("Failed to register strategies", "EAEngine");
+            return false;
+        }
+        
         // Initialization complete
         m_initialized = true;
         m_lastTickTime = TimeCurrent();
@@ -139,8 +172,8 @@ public:
                      AccountInfoInteger(ACCOUNT_LOGIN),
                      AccountInfoDouble(ACCOUNT_BALANCE),
                      (int)AccountInfoInteger(ACCOUNT_LEVERAGE)), "EAEngine");
-        m_logger.Info(StringFormat("Symbol: %s | Timeframe: %s",
-                     _Symbol, EnumToString(Period())), "EAEngine");
+        m_logger.Info(StringFormat("Active Strategies: %d", 
+                     m_strategyDispatcher.GetStrategyCount()), "EAEngine");
         m_logger.Info("═══════════════════════════════════════════════════", "EAEngine");
         
         Print("╔════════════════════════════════════════════════════════════╗");
@@ -148,6 +181,51 @@ public:
         Print("╚════════════════════════════════════════════════════════════╝");
         
         return true;
+    }
+    
+    // Register strategies
+    bool RegisterStrategies()
+    {
+        m_logger.Info("Registering strategies...", "EAEngine");
+        
+        int registeredCount = 0;
+        
+        // EURUSD Trend-Following Strategy
+        if(m_config.enableTrendFollowing)
+        {
+            CEURUSDTrendFollowing* eurusdStrategy = new CEURUSDTrendFollowing(m_logger, m_riskManager);
+            
+            StrategyConfig strategyConfig;
+            strategyConfig.symbol = "EURUSD";
+            strategyConfig.timeframe = PERIOD_H1;
+            strategyConfig.strategyType = STRATEGY_TREND_FOLLOWING;
+            strategyConfig.riskPercent = 1.5;
+            strategyConfig.maxOpenTrades = 1;
+            strategyConfig.enableTrading = true;
+            strategyConfig.magicNumber = EA_MAGIC_NUMBER + 1;
+            
+            eurusdStrategy.SetConfig(strategyConfig);
+            
+            if(m_strategyDispatcher.RegisterStrategy(eurusdStrategy))
+            {
+                m_logger.Info("EURUSD Trend-Following strategy registered", "EAEngine");
+                registeredCount++;
+            }
+            else
+            {
+                m_logger.Error("Failed to register EURUSD Trend-Following strategy", "EAEngine");
+                delete eurusdStrategy;
+            }
+        }
+        
+        // Add more strategies here as they are implemented
+        // Example:
+        // if(m_config.enableBreakout) { ... }
+        // if(m_config.enableScalping) { ... }
+        
+        m_logger.Info(StringFormat("Strategy registration complete: %d strategies active", registeredCount), "EAEngine");
+        
+        return (registeredCount > 0);
     }
     
     // Process tick event
@@ -163,16 +241,17 @@ public:
         m_tickCount++;
         m_lastTickTime = tick.time;
 
-        // Process tick in each module with null checks
+        // Process tick in risk manager
         if(m_riskManager != NULL && m_riskManager.IsInitialized())
         {
             m_riskManager.ProcessTick(tick);
         }
 
-        // Trade executor doesn't need every tick
-        // Strategies will be added in Phase 2
-
-        // Future: Process strategies here
+        // Process tick in strategy dispatcher
+        if(m_strategyDispatcher != NULL && m_strategyDispatcher.IsInitialized())
+        {
+            m_strategyDispatcher.ProcessTick(tick);
+        }
 
         // Track performance
         TrackPerformance();
@@ -192,8 +271,6 @@ public:
         {
             m_riskManager.ProcessTick(tick);
         }
-        
-        // Future: Update strategy states, portfolio metrics
     }
     
     // Process timer event
@@ -204,7 +281,13 @@ public:
         
         m_logger.Debug("Timer event", "EAEngine");
         
-        // Future: Periodic tasks like performance logging, health checks
+        // Periodic health check
+        if(m_tickCount % 1000 == 0)
+        {
+            m_logger.Info(StringFormat("Health Check - Ticks: %llu, AvgTime: %.3f ms, Strategies: %d",
+                         m_tickCount, m_avgOnTickTime, 
+                         m_strategyDispatcher.GetStrategyCount()), "EAEngine");
+        }
     }
     
     // Deinitialize EA engine
@@ -222,6 +305,13 @@ public:
         m_logger.Info(StringFormat("Avg OnTick Time: %.3f ms", m_avgOnTickTime), "EAEngine");
         
         // Cleanup modules in reverse order
+        if(m_strategyDispatcher != NULL)
+        {
+            m_strategyDispatcher.Deinitialize();
+            delete m_strategyDispatcher;
+            m_strategyDispatcher = NULL;
+        }
+        
         if(m_tradeExecutor != NULL)
         {
             m_tradeExecutor.Deinitialize();
@@ -274,13 +364,6 @@ private:
         {
             m_logger.Warning(StringFormat("Slow OnTick: %.3f ms (Threshold: %d ms)", 
                            executionTime, ONTICK_MAX_TIME_MS), "EAEngine");
-        }
-        
-        // Log performance every 1000 ticks
-        if(m_tickCount % 1000 == 0)
-        {
-            m_logger.Debug(StringFormat("Performance: Ticks=%llu, AvgTime=%.3f ms", 
-                         m_tickCount, m_avgOnTickTime), "EAEngine");
         }
     }
 };
