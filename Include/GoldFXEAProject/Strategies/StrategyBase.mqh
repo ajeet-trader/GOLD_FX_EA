@@ -257,40 +257,38 @@ protected:
     }
     
     // Create indicator
-    int CreateIndicator(string indicatorName, ENUM_INDICATOR indicator, int period1 = 0, 
+    int CreateIndicator(string indicatorName, string indicatorType, int period1 = 0, 
                        int period2 = 0, int period3 = 0)
     {
         int handle = INVALID_HANDLE;
         
-        switch(indicator)
+        if(indicatorType == "MA")
         {
-            case IND_MA:
-                handle = iMA(m_config.symbol, m_config.timeframe, period1, 0, MODE_EMA, PRICE_CLOSE);
-                break;
-                
-            case IND_ATR:
-                handle = iATR(m_config.symbol, m_config.timeframe, period1);
-                break;
-                
-            case IND_ADX:
-                handle = iADX(m_config.symbol, m_config.timeframe, period1);
-                break;
-                
-            case IND_MACD:
-                handle = iMACD(m_config.symbol, m_config.timeframe, period1, period2, period3, PRICE_CLOSE);
-                break;
-                
-            case IND_RSI:
-                handle = iRSI(m_config.symbol, m_config.timeframe, period1, PRICE_CLOSE);
-                break;
-                
-            case IND_STOCHASTIC:
-                handle = iStochastic(m_config.symbol, m_config.timeframe, period1, period2, period3, MODE_SMA, STO_LOWHIGH);
-                break;
-                
-            case IND_BANDS:
-                handle = iBands(m_config.symbol, m_config.timeframe, period1, 0, 2.0, PRICE_CLOSE);
-                break;
+            handle = iMA(m_config.symbol, m_config.timeframe, period1, 0, MODE_EMA, PRICE_CLOSE);
+        }
+        else if(indicatorType == "ATR")
+        {
+            handle = iATR(m_config.symbol, m_config.timeframe, period1);
+        }
+        else if(indicatorType == "ADX")
+        {
+            handle = iADX(m_config.symbol, m_config.timeframe, period1);
+        }
+        else if(indicatorType == "MACD")
+        {
+            handle = iMACD(m_config.symbol, m_config.timeframe, period1, period2, period3, PRICE_CLOSE);
+        }
+        else if(indicatorType == "RSI")
+        {
+            handle = iRSI(m_config.symbol, m_config.timeframe, period1, PRICE_CLOSE);
+        }
+        else if(indicatorType == "STOCHASTIC")
+        {
+            handle = iStochastic(m_config.symbol, m_config.timeframe, period1, period2, period3, MODE_SMA, STO_LOWHIGH);
+        }
+        else if(indicatorType == "BANDS")
+        {
+            handle = iBands(m_config.symbol, m_config.timeframe, period1, 0, 2.0, PRICE_CLOSE);
         }
         
         if(handle == INVALID_HANDLE)
@@ -338,15 +336,4 @@ protected:
     }
 };
 
-// Enum for indicator types (for CreateIndicator)
-enum ENUM_INDICATOR
-{
-    IND_MA,
-    IND_ATR,
-    IND_ADX,
-    IND_MACD,
-    IND_RSI,
-    IND_STOCHASTIC,
-    IND_BANDS
-};
 //+------------------------------------------------------------------+

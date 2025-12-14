@@ -309,8 +309,7 @@ private:
 
         // Check stop loss and take profit
         double point = SymbolInfoDouble(request.symbol, SYMBOL_POINT);
-        long stopsLevelLong = SymbolInfoInteger(request.symbol, SYMBOL_TRADE_STOPS_LEVEL);
-        int stopsLevel = (int)stopsLevelLong;
+        long stopsLevel = SymbolInfoInteger(request.symbol, SYMBOL_TRADE_STOPS_LEVEL);
 
         if(stopsLevel > 0)
         {
@@ -318,7 +317,7 @@ private:
                                  SymbolInfoDouble(request.symbol, SYMBOL_ASK) :
                                  SymbolInfoDouble(request.symbol, SYMBOL_BID);
 
-            double minDistance = stopsLevel * point;
+            double minDistance = (double)stopsLevel * point;
 
             if(request.stopLoss > 0)
             {

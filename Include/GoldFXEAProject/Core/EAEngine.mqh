@@ -11,8 +11,11 @@
 #include <GoldFXEAProject/Core/TradeExecutor.mqh>
 #include <GoldFXEAProject/Strategies/StrategyDispatcher.mqh>
 
-// Include strategies
+// Include all strategies
 #include <GoldFXEAProject/Strategies/Forex/EURUSDTrendFollowing.mqh>
+#include <GoldFXEAProject/Strategies/Forex/GBPUSDBreakout.mqh>
+#include <GoldFXEAProject/Strategies/Crypto/BTCUSDMomentum.mqh>
+#include <GoldFXEAProject/Strategies/Metals/XAUUSDScalping.mqh>
 
 //+------------------------------------------------------------------+
 //| CEAEngine Class                                                  |
@@ -64,7 +67,7 @@ public:
     {
         Print("╔════════════════════════════════════════════════════════════╗");
         Print("║          Initializing GoldFXEA Core Engine                ║");
-        Print("║                    PHASE 2: Strategies                     ║");
+        Print("║             PHASE 2: Multi-Strategy Foundation             ║");
         Print("╚════════════════════════════════════════════════════════════╝");
         
         m_config = config;
@@ -155,6 +158,7 @@ public:
         Print("✓ Strategy Dispatcher initialized");
         
         // Register strategies based on config
+        Print("\n→ Registering Active Strategies...");
         if(!RegisterStrategies())
         {
             m_logger.Critical("Failed to register strategies", "EAEngine");
@@ -176,9 +180,9 @@ public:
                      m_strategyDispatcher.GetStrategyCount()), "EAEngine");
         m_logger.Info("═══════════════════════════════════════════════════", "EAEngine");
         
-        Print("╔════════════════════════════════════════════════════════════╗");
+        Print("\n╔════════════════════════════════════════════════════════════╗");
         Print("║        GoldFXEA Core Engine Ready For Trading             ║");
-        Print("╚════════════════════════════════════════════════════════════╝");
+        Print("╚════════════════════════════════════════════════════════════╝\n");
         
         return true;
     }
@@ -186,13 +190,14 @@ public:
     // Register strategies
     bool RegisterStrategies()
     {
-        m_logger.Info("Registering strategies...", "EAEngine");
+        m_logger.Info("Registering strategies based on configuration...", "EAEngine");
         
         int registeredCount = 0;
         
-        // EURUSD Trend-Following Strategy
+        // 1. EURUSD Trend-Following Strategy
         if(m_config.enableTrendFollowing)
         {
+            Print("  → Registering EURUSD Trend-Following...");
             CEURUSDTrendFollowing* eurusdStrategy = new CEURUSDTrendFollowing(m_logger, m_riskManager);
             
             StrategyConfig strategyConfig;
@@ -208,22 +213,114 @@ public:
             
             if(m_strategyDispatcher.RegisterStrategy(eurusdStrategy))
             {
-                m_logger.Info("EURUSD Trend-Following strategy registered", "EAEngine");
+                m_logger.Info("✓ EURUSD Trend-Following strategy registered", "EAEngine");
+                Print("    ✓ EURUSD H1 Trend-Following Active");
                 registeredCount++;
             }
             else
             {
-                m_logger.Error("Failed to register EURUSD Trend-Following strategy", "EAEngine");
+                m_logger.Error("✗ Failed to register EURUSD Trend-Following strategy", "EAEngine");
+                Print("    ✗ EURUSD H1 Trend-Following Failed");
                 delete eurusdStrategy;
             }
         }
         
-        // Add more strategies here as they are implemented
-        // Example:
-        // if(m_config.enableBreakout) { ... }
-        // if(m_config.enableScalping) { ... }
+        // 2. GBPUSD Breakout Strategy
+        if(m_config.enableBreakout)
+        {
+            Print("  → Registering GBPUSD Breakout...");
+            CGBPUSDBreakout* gbpusdStrategy = new CGBPUSDBreakout(m_logger, m_riskManager);
+            
+            StrategyConfig strategyConfig;
+            strategyConfig.symbol = "GBPUSD";
+            strategyConfig.timeframe = PERIOD_M30;
+            strategyConfig.strategyType = STRATEGY_BREAKOUT;
+            strategyConfig.riskPercent = 2.0;
+            strategyConfig.maxOpenTrades = 1;
+            strategyConfig.enableTrading = true;
+            strategyConfig.magicNumber = EA_MAGIC_NUMBER + 2;
+            
+            gbpusdStrategy.SetConfig(strategyConfig);
+            
+            if(m_strategyDispatcher.RegisterStrategy(gbpusdStrategy))
+            {
+                m_logger.Info("✓ GBPUSD Breakout strategy registered", "EAEngine");
+                Print("    ✓ GBPUSD M30 Breakout Active");
+                registeredCount++;
+            }
+            else
+            {
+                m_logger.Error("✗ Failed to register GBPUSD Breakout strategy", "EAEngine");
+                Print("    ✗ GBPUSD M30 Breakout Failed");
+                delete gbpusdStrategy;
+            }
+        }
         
+        // 3. BTCUSD Momentum Strategy (Crypto)
+        if(m_config.enableMeanReversion)  // Using this flag for crypto
+        {
+            Print("  → Registering BTCUSD Momentum...");
+            CBTCUSDMomentum* btcStrategy = new CBTCUSDMomentum(m_logger, m_riskManager);
+            
+            StrategyConfig strategyConfig;
+            strategyConfig.symbol = "BTCUSD";
+            strategyConfig.timeframe = PERIOD_M30;
+            strategyConfig.strategyType = STRATEGY_MOMENTUM;
+            strategyConfig.riskPercent = 1.0;  // Lower risk for crypto
+            strategyConfig.maxOpenTrades = 1;
+            strategyConfig.enableTrading = true;
+            strategyConfig.magicNumber = EA_MAGIC_NUMBER + 3;
+            
+            btcStrategy.SetConfig(strategyConfig);
+            
+            if(m_strategyDispatcher.RegisterStrategy(btcStrategy))
+            {
+                m_logger.Info("✓ BTCUSD Momentum strategy registered", "EAEngine");
+                Print("    ✓ BTCUSD M30 Momentum Active");
+                registeredCount++;
+            }
+            else
+            {
+                m_logger.Error("✗ Failed to register BTCUSD Momentum strategy", "EAEngine");
+                Print("    ✗ BTCUSD M30 Momentum Failed");
+                delete btcStrategy;
+            }
+        }
+        
+        // 4. XAUUSD Scalping Strategy (Gold)
+        if(m_config.enableScalping)
+        {
+            Print("  → Registering XAUUSD Scalping...");
+            CXAUUSDScalping* goldStrategy = new CXAUUSDScalping(m_logger, m_riskManager);
+            
+            StrategyConfig strategyConfig;
+            strategyConfig.symbol = "XAUUSD";
+            strategyConfig.timeframe = PERIOD_M15;
+            strategyConfig.strategyType = STRATEGY_SCALPING;
+            strategyConfig.riskPercent = 1.0;
+            strategyConfig.maxOpenTrades = 2;  // Allow 2 scalp positions
+            strategyConfig.enableTrading = true;
+            strategyConfig.magicNumber = EA_MAGIC_NUMBER + 4;
+            
+            goldStrategy.SetConfig(strategyConfig);
+            
+            if(m_strategyDispatcher.RegisterStrategy(goldStrategy))
+            {
+                m_logger.Info("✓ XAUUSD Scalping strategy registered", "EAEngine");
+                Print("    ✓ XAUUSD M15 Scalping Active");
+                registeredCount++;
+            }
+            else
+            {
+                m_logger.Error("✗ Failed to register XAUUSD Scalping strategy", "EAEngine");
+                Print("    ✗ XAUUSD M15 Scalping Failed");
+                delete goldStrategy;
+            }
+        }
+        
+        Print("");  // Blank line
         m_logger.Info(StringFormat("Strategy registration complete: %d strategies active", registeredCount), "EAEngine");
+        Print(StringFormat("  Total Active Strategies: %d\n", registeredCount));
         
         return (registeredCount > 0);
     }
@@ -281,7 +378,7 @@ public:
         
         m_logger.Debug("Timer event", "EAEngine");
         
-        // Periodic health check
+        // Periodic health check every 1000 ticks
         if(m_tickCount % 1000 == 0)
         {
             m_logger.Info(StringFormat("Health Check - Ticks: %llu, AvgTime: %.3f ms, Strategies: %d",

@@ -1,5 +1,5 @@
 //+------------------------------------------------------------------+
-//|                                     EURUSDTrendFollowing.mqh     |
+//|                                         XAUUSDScalping.mqh       |
 //|                                  JULES Trading Systems            |
 //+------------------------------------------------------------------+
 #property copyright "JULES Trading Systems"
@@ -8,46 +8,50 @@
 #include <GoldFXEAProject/Strategies/StrategyBase.mqh>
 
 //+------------------------------------------------------------------+
-//| EURUSD H1 Trend-Following Strategy                                |
-//| Uses: 50/200 EMA crossover + ADX(14) > 25 + MACD confirmation    |
+//| XAUUSD M15 Scalping Strategy                                      |
+//| Uses: EMA(5/13) + Stochastic + Low ATR (consolidation)          |
 //+------------------------------------------------------------------+
-class CEURUSDTrendFollowing : public CStrategyBase
+class CXAUUSDScalping : public CStrategyBase
 {
 private:
     // Strategy parameters
     int m_emaFastPeriod;
     int m_emaSlowPeriod;
-    int m_adxPeriod;
-    double m_adxThreshold;
-    int m_macdFast;
-    int m_macdSlow;
-    int m_macdSignalPeriod;  // Rename to avoid confusion with array
+    int m_stochKPeriod;
+    int m_stochDPeriod;
+    int m_stochSlowing;
+    double m_stochOverbought;
+    double m_stochOversold;
+    int m_atrPeriod;
+    double m_atrLowThreshold;  // Low ATR for consolidation
     double m_atrMultiplierSL;
     double m_atrMultiplierTP;
     int m_minBarsSinceSignal;
     
     // Market state
-    bool m_inTrend;
     datetime m_lastBarTime;
+    double m_avgATR;
     
 public:
     // Constructor
-    CEURUSDTrendFollowing(CLogger* logger, CRiskManager* riskManager) 
-        : CStrategyBase("EURUSD_TrendFollowing", logger, riskManager)
+    CXAUUSDScalping(CLogger* logger, CRiskManager* riskManager) 
+        : CStrategyBase("XAUUSD_Scalping", logger, riskManager)
     {
-        // Default parameters
-        m_emaFastPeriod = 50;
-        m_emaSlowPeriod = 200;
-        m_adxPeriod = 14;
-        m_adxThreshold = 25.0;
-        m_macdFast = 12;
-        m_macdSlow = 26;
-        m_macdSignalPeriod = 9;
-        m_atrMultiplierSL = 3.0;
-        m_atrMultiplierTP = 6.0;
-        m_minBarsSinceSignal = 3;
-        m_inTrend = false;
+        // Default parameters for scalping
+        m_emaFastPeriod = 5;
+        m_emaSlowPeriod = 13;
+        m_stochKPeriod = 5;
+        m_stochDPeriod = 3;
+        m_stochSlowing = 3;
+        m_stochOverbought = 80.0;
+        m_stochOversold = 20.0;
+        m_atrPeriod = 14;
+        m_atrLowThreshold = 0.8;  // ATR below 80% of average = consolidation
+        m_atrMultiplierSL = 1.5;  // Quick scalp stops
+        m_atrMultiplierTP = 2.5;  // Quick scalp targets
+        m_minBarsSinceSignal = 1;
         m_lastBarTime = 0;
+        m_avgATR = 0.0;
     }
     
     // Initialize strategy
@@ -56,31 +60,30 @@ public:
         // Set default config if not set
         if(m_config.symbol == "")
         {
-            m_config.symbol = "EURUSD";
-            m_config.timeframe = PERIOD_H1;
-            m_config.strategyType = STRATEGY_TREND_FOLLOWING;
-            m_config.riskPercent = 1.5;
-            m_config.maxOpenTrades = 1;
-            m_config.magicNumber = EA_MAGIC_NUMBER + 1;
+            m_config.symbol = "XAUUSD";
+            m_config.timeframe = PERIOD_M15;
+            m_config.strategyType = STRATEGY_SCALPING;
+            m_config.riskPercent = 1.0;  // Lower risk for scalping
+            m_config.maxOpenTrades = 2;  // Allow multiple scalp positions
+            m_config.magicNumber = EA_MAGIC_NUMBER + 4;
         }
         
         // Call base initialization
         if(!CStrategyBase::Initialize())
             return false;
         
-        m_logger.Info("Creating indicators for EURUSD Trend-Following", m_moduleName);
+        m_logger.Info("Creating indicators for XAUUSD Scalping", m_moduleName);
         
         // Create indicators
         m_handleEMA_Fast = CreateIndicator("EMA_Fast", "MA", m_emaFastPeriod);
         m_handleEMA_Slow = CreateIndicator("EMA_Slow", "MA", m_emaSlowPeriod);
-        m_handleADX = CreateIndicator("ADX", "ADX", m_adxPeriod);
-        m_handleMACD = CreateIndicator("MACD", "MACD", m_macdFast, m_macdSlow, m_macdSignalPeriod);
-        m_handleATR = CreateIndicator("ATR", "ATR", 14);
+        m_handleStochastic = CreateIndicator("Stochastic", "STOCHASTIC", 
+                                            m_stochKPeriod, m_stochDPeriod, m_stochSlowing);
+        m_handleATR = CreateIndicator("ATR", "ATR", m_atrPeriod);
         
         // Validate indicators
         if(m_handleEMA_Fast == INVALID_HANDLE || m_handleEMA_Slow == INVALID_HANDLE ||
-           m_handleADX == INVALID_HANDLE || m_handleMACD == INVALID_HANDLE ||
-           m_handleATR == INVALID_HANDLE)
+           m_handleStochastic == INVALID_HANDLE || m_handleATR == INVALID_HANDLE)
         {
             m_logger.Error("Failed to create required indicators", m_moduleName);
             return false;
@@ -89,15 +92,17 @@ public:
         // Wait for indicator data
         if(!WaitForIndicatorData(m_handleEMA_Fast, m_emaSlowPeriod + 10) ||
            !WaitForIndicatorData(m_handleEMA_Slow, m_emaSlowPeriod + 10) ||
-           !WaitForIndicatorData(m_handleADX, m_adxPeriod + 10) ||
-           !WaitForIndicatorData(m_handleMACD, m_macdSlow + 10) ||
-           !WaitForIndicatorData(m_handleATR, 14 + 10))
+           !WaitForIndicatorData(m_handleStochastic, m_stochKPeriod + 10) ||
+           !WaitForIndicatorData(m_handleATR, m_atrPeriod + 10))
         {
             m_logger.Error("Timeout waiting for indicator data", m_moduleName);
             return false;
         }
         
-        m_logger.Info("EURUSD Trend-Following strategy ready", m_moduleName);
+        // Calculate average ATR
+        CalculateAvgATR();
+        
+        m_logger.Info("XAUUSD Scalping strategy ready", m_moduleName);
         m_status = MODULE_STATUS_RUNNING;
         return true;
     }
@@ -114,6 +119,10 @@ public:
         
         // Update open positions count
         m_openPositions = CountOpenPositions();
+        
+        // Recalculate average ATR periodically
+        if(Bars(m_config.symbol, m_config.timeframe, 0, TimeCurrent()) % 20 == 0)
+            CalculateAvgATR();
         
         // Generate and process signal
         TradeSignal signal = GenerateSignal();
@@ -142,58 +151,68 @@ public:
             return signal;
         }
         
-        // Check if already in trade
-        if(m_openPositions > 0)
+        // Check if max trades reached
+        if(m_openPositions >= m_config.maxOpenTrades)
         {
             signal.signalType = SIGNAL_NONE;
             return signal;
         }
         
-        // Get current indicator values
+        // Get current values
         double emaFastCurrent = m_emaFast[0];
         double emaFastPrevious = m_emaFast[1];
         double emaSlowCurrent = m_emaSlow[0];
         double emaSlowPrevious = m_emaSlow[1];
-        double adxCurrent = m_adx[0];
-        double macdMain = m_macdMain[0];
-        double macdSignal = m_macdSignal[0];
+        double atrCurrent = m_atr[0];
+        double stochMain = m_stochMain[0];
+        double stochSignal = m_stochSignal[0];
+        double stochMainPrev = m_stochMain[1];
+        double stochSignalPrev = m_stochSignal[1];
         
-        // Check for bullish trend
-        bool bullishCrossover = (emaFastPrevious <= emaSlowPrevious) && (emaFastCurrent > emaSlowCurrent);
-        bool strongTrend = adxCurrent > m_adxThreshold;
-        bool macdBullish = macdMain > macdSignal && macdMain > 0;
+        // Check for consolidation (low volatility)
+        bool lowVolatility = (atrCurrent < m_avgATR * m_atrLowThreshold);
         
-        if(bullishCrossover && strongTrend && macdBullish)
+        if(!lowVolatility)
+        {
+            signal.signalType = SIGNAL_NONE;
+            return signal;  // Only trade in consolidation
+        }
+        
+        // Check for bullish scalp setup
+        bool emaBullishCross = (emaFastPrevious <= emaSlowPrevious) && (emaFastCurrent > emaSlowCurrent);
+        bool stochOversoldBounce = (stochMainPrev < m_stochOversold) && (stochMain > m_stochOversold);
+        bool stochBullishCross = (stochMainPrev <= stochSignalPrev) && (stochMain > stochSignal);
+        
+        if(emaBullishCross || (stochOversoldBounce && stochBullishCross))
         {
             signal.signalType = SIGNAL_BUY;
-            signal.confidence = CalculateConfidence(true, adxCurrent, macdMain, macdSignal);
+            signal.confidence = CalculateConfidence(true, emaFastCurrent, emaSlowCurrent,
+                                                   stochMain, atrCurrent);
             signal.entryPrice = GetCurrentPrice(ORDER_TYPE_BUY);
             
             CalculateStopLoss(signal.entryPrice, ORDER_TYPE_BUY, signal.stopLoss);
             CalculateTakeProfit(signal.entryPrice, ORDER_TYPE_BUY, signal.takeProfit);
             
-            signal.reason = StringFormat("Bullish EMA Crossover + ADX=%.1f + MACD Bullish", adxCurrent);
-            
-            m_inTrend = true;
+            signal.reason = StringFormat("Bullish Scalp: EMA Cross + Stoch=%.1f + Low ATR", stochMain);
             return signal;
         }
         
-        // Check for bearish trend
-        bool bearishCrossover = (emaFastPrevious >= emaSlowPrevious) && (emaFastCurrent < emaSlowCurrent);
-        bool macdBearish = macdMain < macdSignal && macdMain < 0;
+        // Check for bearish scalp setup
+        bool emaBearishCross = (emaFastPrevious >= emaSlowPrevious) && (emaFastCurrent < emaSlowCurrent);
+        bool stochOverboughtDrop = (stochMainPrev > m_stochOverbought) && (stochMain < m_stochOverbought);
+        bool stochBearishCross = (stochMainPrev >= stochSignalPrev) && (stochMain < stochSignal);
         
-        if(bearishCrossover && strongTrend && macdBearish)
+        if(emaBearishCross || (stochOverboughtDrop && stochBearishCross))
         {
             signal.signalType = SIGNAL_SELL;
-            signal.confidence = CalculateConfidence(false, adxCurrent, macdMain, macdSignal);
+            signal.confidence = CalculateConfidence(false, emaFastCurrent, emaSlowCurrent,
+                                                   stochMain, atrCurrent);
             signal.entryPrice = GetCurrentPrice(ORDER_TYPE_SELL);
             
             CalculateStopLoss(signal.entryPrice, ORDER_TYPE_SELL, signal.stopLoss);
             CalculateTakeProfit(signal.entryPrice, ORDER_TYPE_SELL, signal.takeProfit);
             
-            signal.reason = StringFormat("Bearish EMA Crossover + ADX=%.1f + MACD Bearish", adxCurrent);
-            
-            m_inTrend = true;
+            signal.reason = StringFormat("Bearish Scalp: EMA Cross + Stoch=%.1f + Low ATR", stochMain);
             return signal;
         }
         
@@ -207,21 +226,19 @@ public:
         if(signal.signalType == SIGNAL_NONE)
             return false;
         
-        // Check confidence threshold
-        if(signal.confidence < 0.60)
+        if(signal.confidence < 0.55)  // Lower threshold for scalping
         {
             m_logger.Debug(StringFormat("Signal confidence too low: %.2f", signal.confidence), m_moduleName);
             return false;
         }
         
-        // Check if trading is allowed
         if(!IsTradingAllowed())
         {
             m_logger.Debug("Trading not allowed currently", m_moduleName);
             return false;
         }
         
-        // Check minimum time between signals
+        // Less restrictive timing for scalping
         if(m_lastSignalTime > 0)
         {
             int barsSinceSignal = Bars(m_config.symbol, m_config.timeframe, m_lastSignalTime, TimeCurrent());
@@ -230,13 +247,6 @@ public:
                 m_logger.Debug(StringFormat("Too soon since last signal (%d bars)", barsSinceSignal), m_moduleName);
                 return false;
             }
-        }
-        
-        // Validate stop loss and take profit
-        if(signal.stopLoss <= 0 || signal.takeProfit <= 0)
-        {
-            m_logger.Error("Invalid SL/TP levels", m_moduleName);
-            return false;
         }
         
         return true;
@@ -260,33 +270,30 @@ public:
         if(!PositionSelectByTicket(ticket))
             return false;
         
-        // Update indicators
         if(!UpdateIndicators())
             return false;
         
         ENUM_POSITION_TYPE posType = (ENUM_POSITION_TYPE)PositionGetInteger(POSITION_TYPE);
         
-        // Check for opposite signal
         double emaFastCurrent = m_emaFast[0];
         double emaSlowCurrent = m_emaSlow[0];
-        double macdMain = m_macdMain[0];
-        double macdSignal = m_macdSignal[0];
+        double stochMain = m_stochMain[0];
+        double stochSignal = m_stochSignal[0];
         
+        // Quick exit on opposite signal (scalping exits fast)
         if(posType == POSITION_TYPE_BUY)
         {
-            // Close if bearish conditions
-            if(emaFastCurrent < emaSlowCurrent || (macdMain < macdSignal && macdMain < 0))
+            if(emaFastCurrent < emaSlowCurrent || (stochMain < stochSignal && stochMain > 70))
             {
-                m_logger.Info("Closing BUY position - Bearish signal detected", m_moduleName);
+                m_logger.Info("Closing BUY scalp - Opposite signal", m_moduleName);
                 return true;
             }
         }
         else if(posType == POSITION_TYPE_SELL)
         {
-            // Close if bullish conditions
-            if(emaFastCurrent > emaSlowCurrent || (macdMain > macdSignal && macdMain > 0))
+            if(emaFastCurrent > emaSlowCurrent || (stochMain > stochSignal && stochMain < 30))
             {
-                m_logger.Info("Closing SELL position - Bullish signal detected", m_moduleName);
+                m_logger.Info("Closing SELL scalp - Opposite signal", m_moduleName);
                 return true;
             }
         }
@@ -297,8 +304,7 @@ public:
     // Should modify position
     virtual bool ShouldModifyPosition(ulong ticket, double &newSL, double &newTP) override
     {
-        // Implement trailing stop logic here if needed
-        return false;
+        return false;  // No modification for quick scalps
     }
     
     // Get market condition
@@ -307,16 +313,14 @@ public:
         if(!UpdateIndicators())
             return "UNKNOWN";
         
-        double adxCurrent = m_adx[0];
+        double atrCurrent = m_atr[0];
         
-        if(adxCurrent > 40)
-            return "STRONG_TREND";
-        else if(adxCurrent > 25)
-            return "TREND";
-        else if(adxCurrent > 20)
-            return "WEAK_TREND";
+        if(atrCurrent < m_avgATR * 0.7)
+            return "LOW_VOLATILITY";
+        else if(atrCurrent > m_avgATR * 1.3)
+            return "HIGH_VOLATILITY";
         else
-            return "RANGING";
+            return "NORMAL";
     }
     
 private:
@@ -325,41 +329,64 @@ private:
     {
         ArrayResize(m_emaFast, 3);
         ArrayResize(m_emaSlow, 3);
-        ArrayResize(m_adx, 3);
-        ArrayResize(m_macdMain, 3);
-        ArrayResize(m_macdSignal, 3);
+        ArrayResize(m_stochMain, 3);
+        ArrayResize(m_stochSignal, 3);
         ArrayResize(m_atr, 3);
-
+        
         if(CopyBuffer(m_handleEMA_Fast, 0, 0, 3, m_emaFast) <= 0) return false;
         if(CopyBuffer(m_handleEMA_Slow, 0, 0, 3, m_emaSlow) <= 0) return false;
-        if(CopyBuffer(m_handleADX, 0, 0, 3, m_adx) <= 0) return false;
-        if(CopyBuffer(m_handleMACD, 0, 0, 3, m_macdMain) <= 0) return false;
-        if(CopyBuffer(m_handleMACD, 1, 0, 3, m_macdSignal) <= 0) return false;
+        if(CopyBuffer(m_handleStochastic, 0, 0, 3, m_stochMain) <= 0) return false;
+        if(CopyBuffer(m_handleStochastic, 1, 0, 3, m_stochSignal) <= 0) return false;
         if(CopyBuffer(m_handleATR, 0, 0, 3, m_atr) <= 0) return false;
         
         return true;
     }
     
-    // Calculate signal confidence
-    double CalculateConfidence(bool isBullish, double adx, double macdMain, double macdSignal)
+    // Calculate average ATR
+    void CalculateAvgATR()
     {
-        double confidence = 0.5; // Base confidence
+        double atrValues[];
+        ArraySetAsSeries(atrValues, true);
         
-        // ADX strength component (max +0.25)
-        if(adx > 40)
-            confidence += 0.25;
-        else if(adx > 30)
-            confidence += 0.15;
-        else if(adx > 25)
+        if(CopyBuffer(m_handleATR, 0, 0, 50, atrValues) > 0)
+        {
+            double sum = 0.0;
+            for(int i = 0; i < 50; i++)
+                sum += atrValues[i];
+            m_avgATR = sum / 50.0;
+            
+            m_logger.Debug(StringFormat("Average ATR calculated: %.5f", m_avgATR), m_moduleName);
+        }
+    }
+    
+    // Calculate signal confidence
+    double CalculateConfidence(bool isBullish, double emaFast, double emaSlow,
+                              double stoch, double atr)
+    {
+        double confidence = 0.5;
+        
+        // EMA separation component (max +0.20)
+        double emaSeparation = MathAbs(emaFast - emaSlow) / emaSlow * 100.0;
+        if(emaSeparation > 0.5)
+            confidence += 0.20;
+        else if(emaSeparation > 0.3)
             confidence += 0.10;
         
-        // MACD strength component (max +0.25)
-        double macdDiff = MathAbs(macdMain - macdSignal);
-        if(macdDiff > 0.0010)
-            confidence += 0.25;
-        else if(macdDiff > 0.0005)
-            confidence += 0.15;
-        else
+        // Stochastic position component (max +0.20)
+        if(isBullish && stoch < 40)
+            confidence += 0.20;
+        else if(!isBullish && stoch > 60)
+            confidence += 0.20;
+        else if(isBullish && stoch < 50)
+            confidence += 0.10;
+        else if(!isBullish && stoch > 50)
+            confidence += 0.10;
+        
+        // Low volatility component (max +0.10)
+        double atrRatio = atr / m_avgATR;
+        if(atrRatio < 0.7)
+            confidence += 0.10;
+        else if(atrRatio < 0.8)
             confidence += 0.05;
         
         return MathMin(confidence, 1.0);
