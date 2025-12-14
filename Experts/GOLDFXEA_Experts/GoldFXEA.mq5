@@ -27,11 +27,11 @@ input double   MaxDrawdown = 20.0;                // Max Drawdown (%)
 input int      MaxOpenTrades = 10;                // Max Open Trades
 
 input group "=== Strategy Selection ==="
-input bool     EnableTrendFollowing = true;       // Enable Trend Following
-input bool     EnableBreakout = false;            // Enable Breakout
-input bool     EnableMeanReversion = false;       // Enable Mean Reversion
-input bool     EnableScalping = false;            // Enable Scalping
-input bool     EnableIndices = false;             // Enable Indices Trading
+input bool     EnableTrendFollowing = true;       // Trend Following (EURUSD, H1)
+input bool     EnableBreakout = false;            // Breakout (GBPUSD, M30)
+input bool     EnableMeanReversion = false;       // Momentum (BTCUSD, M30)
+input bool     EnableScalping = false;            // Scalping (XAUUSD, M15)
+input bool     EnableIndices = false;             // Mean Reversion (SP500, H1)
 
 //+------------------------------------------------------------------+
 //| Global Variables                                                  |

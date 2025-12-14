@@ -130,7 +130,7 @@ struct TradeResult
     ulong ticket;
     double executedPrice;
     double executedVolume;
-    int retcode;
+    uint retcode;
     string message;
     
     // Constructor
