@@ -13,11 +13,14 @@
 #include <GoldFXEAProject/Strategies/StrategyDispatcher.mqh>
 
 // Include all strategies
-#include <GoldFXEAProject/Strategies/Forex/EURUSDTrendFollowing.mqh>
-#include <GoldFXEAProject/Strategies/Forex/GBPUSDBreakout.mqh>
-#include <GoldFXEAProject/Strategies/Crypto/BTCUSDMomentum.mqh>
-#include <GoldFXEAProject/Strategies/Metals/XAUUSDScalping.mqh>
-#include <GoldFXEAProject/Strategies/Indices/SP500MeanReversion.mqh>
+#include <GoldFXEAProject/Strategies/Forex/EURUSD_Strategy1_EMA_RSI.mqh>
+#include <GoldFXEAProject/Strategies/Forex/EURUSD_Strategy2_Bollinger_MeanReversion.mqh>
+#include <GoldFXEAProject/Strategies/Forex/EURUSD_Strategy3_ADX_Trend.mqh>
+#include <GoldFXEAProject/Strategies/Forex/GBPUSD_Strategy1_Fib_Pullback.mqh>
+#include <GoldFXEAProject/Strategies/Forex/GBPUSD_Strategy2_RSI_MeanReversion.mqh>
+#include <GoldFXEAProject/Strategies/Forex/GBPUSD_Strategy3_London_Breakout.mqh>
+#include <GoldFXEAProject/Strategies/Forex/USDJPY_Strategy1_ADX_Trend.mqh>
+#include <GoldFXEAProject/Strategies/Forex/USDJPY_Strategy2_Carry_Trade.mqh>
 
 //+------------------------------------------------------------------+
 //| CEAEngine Class                                                  |
@@ -196,160 +199,191 @@ public:
         
         int registeredCount = 0;
         
-        // 1. EURUSD Trend-Following Strategy
+        // 1. EURUSD Strategies
         if(m_config.enableTrendFollowing)
         {
-            Print("  → Registering EURUSD Trend-Following...");
-            CEURUSDTrendFollowing* eurusdStrategy = new CEURUSDTrendFollowing(m_logger, m_riskManager);
-            
-            StrategyConfig strategyConfig;
-            strategyConfig.symbol = CSymbolManager::GetCorrectSymbol("EURUSD");
-            strategyConfig.timeframe = PERIOD_H1;
-            strategyConfig.strategyType = STRATEGY_TREND_FOLLOWING;
-            strategyConfig.riskPercent = 1.5;
-            strategyConfig.maxOpenTrades = 1;
-            strategyConfig.enableTrading = true;
-            strategyConfig.magicNumber = EA_MAGIC_NUMBER + 1;
-            
-            eurusdStrategy.SetConfig(strategyConfig);
-            
-            if(m_strategyDispatcher.RegisterStrategy(eurusdStrategy))
+            // Strategy 1: EMA RSI
+            CEURUSD_Strategy1_EMA_RSI* eurusd1 = new CEURUSD_Strategy1_EMA_RSI(m_logger, m_riskManager);
+            StrategyConfig config1;
+            config1.symbol = CSymbolManager::GetCorrectSymbol("EURUSD");
+            config1.timeframe = PERIOD_H1;
+            config1.strategyType = STRATEGY_TREND_FOLLOWING;
+            config1.riskPercent = 1.0;
+            config1.maxOpenTrades = 1;
+            config1.enableTrading = true;
+            config1.magicNumber = EA_MAGIC_NUMBER + 101;
+            eurusd1.SetConfig(config1);
+            if(m_strategyDispatcher.RegisterStrategy(eurusd1)) 
             {
-                m_logger.Info("✓ EURUSD Trend-Following strategy registered", "EAEngine");
-                Print("    ✓ EURUSD H1 Trend-Following Active");
+                Print("    ✓ EURUSD Strategy 1 (EMA RSI) Active");
                 registeredCount++;
             }
-            else
+            else delete eurusd1;
+            
+            // Strategy 3: ADX Trend
+            CEURUSD_Strategy3_ADX_Trend* eurusd3 = new CEURUSD_Strategy3_ADX_Trend(m_logger, m_riskManager);
+            StrategyConfig config3;
+            config3.symbol = CSymbolManager::GetCorrectSymbol("EURUSD");
+            config3.timeframe = PERIOD_H1;
+            config3.strategyType = STRATEGY_TREND_FOLLOWING;
+            config3.riskPercent = 1.0;
+            config3.maxOpenTrades = 1;
+            config3.enableTrading = true;
+            config3.magicNumber = EA_MAGIC_NUMBER + 103;
+            eurusd3.SetConfig(config3);
+            if(m_strategyDispatcher.RegisterStrategy(eurusd3)) 
             {
-                m_logger.Error("✗ Failed to register EURUSD Trend-Following strategy", "EAEngine");
-                Print("    ✗ EURUSD H1 Trend-Following Failed");
-                delete eurusdStrategy;
+                Print("    ✓ EURUSD Strategy 3 (ADX Trend) Active");
+                registeredCount++;
             }
+            else delete eurusd3;
         }
         
-        // 2. GBPUSD Breakout Strategy
+        if(m_config.enableMeanReversion)
+        {
+            // Strategy 2: Bollinger Mean Reversion
+            CEURUSD_Strategy2_Bollinger_MeanReversion* eurusd2 = new CEURUSD_Strategy2_Bollinger_MeanReversion(m_logger, m_riskManager);
+            StrategyConfig config2;
+            config2.symbol = CSymbolManager::GetCorrectSymbol("EURUSD");
+            config2.timeframe = PERIOD_M30;
+            config2.strategyType = STRATEGY_MEAN_REVERSION;
+            config2.riskPercent = 1.5;
+            config2.maxOpenTrades = 1;
+            config2.enableTrading = true;
+            config2.magicNumber = EA_MAGIC_NUMBER + 102;
+            eurusd2.SetConfig(config2);
+            if(m_strategyDispatcher.RegisterStrategy(eurusd2)) 
+            {
+                Print("    ✓ EURUSD Strategy 2 (Bollinger MeanRev) Active");
+                registeredCount++;
+            }
+            else delete eurusd2;
+        }
+        
+        // 2. GBPUSD Strategies
+        if(m_config.enableTrendFollowing)
+        {
+             // Strategy 1: Fib Pullback
+             CGBPUSD_Strategy1_Fib_Pullback* gbpusd1 = new CGBPUSD_Strategy1_Fib_Pullback(m_logger, m_riskManager);
+             StrategyConfig configG1;
+             configG1.symbol = CSymbolManager::GetCorrectSymbol("GBPUSD");
+             configG1.timeframe = PERIOD_H4;
+             configG1.strategyType = STRATEGY_TREND_FOLLOWING;
+             configG1.riskPercent = 1.5;
+             configG1.maxOpenTrades = 1;
+             configG1.enableTrading = true;
+             configG1.magicNumber = EA_MAGIC_NUMBER + 201;
+             gbpusd1.SetConfig(configG1);
+             if(m_strategyDispatcher.RegisterStrategy(gbpusd1)) 
+             {
+                 Print("    ✓ GBPUSD Strategy 1 (Fib Pullback) Active");
+                 registeredCount++;
+             }
+             else delete gbpusd1;
+        }
+        
+        if(m_config.enableMeanReversion)
+        {
+             // Strategy 2: RSI Mean Reversion
+             CGBPUSD_Strategy2_RSI_MeanReversion* gbpusd2 = new CGBPUSD_Strategy2_RSI_MeanReversion(m_logger, m_riskManager);
+             StrategyConfig configG2;
+             configG2.symbol = CSymbolManager::GetCorrectSymbol("GBPUSD");
+             configG2.timeframe = PERIOD_M30;
+             configG2.strategyType = STRATEGY_MEAN_REVERSION;
+             configG2.riskPercent = 1.5;
+             configG2.maxOpenTrades = 1;
+             configG2.enableTrading = true;
+             configG2.magicNumber = EA_MAGIC_NUMBER + 202;
+             gbpusd2.SetConfig(configG2);
+             if(m_strategyDispatcher.RegisterStrategy(gbpusd2)) 
+             {
+                 Print("    ✓ GBPUSD Strategy 2 (RSI MeanRev) Active");
+                 registeredCount++;
+             }
+             else delete gbpusd2;
+        }
+        
         if(m_config.enableBreakout)
         {
-            Print("  → Registering GBPUSD Breakout...");
-            CGBPUSDBreakout* gbpusdStrategy = new CGBPUSDBreakout(m_logger, m_riskManager);
-            
-            StrategyConfig strategyConfig;
-            strategyConfig.symbol = CSymbolManager::GetCorrectSymbol("GBPUSD");
-            strategyConfig.timeframe = PERIOD_M30;
-            strategyConfig.strategyType = STRATEGY_BREAKOUT;
-            strategyConfig.riskPercent = 2.0;
-            strategyConfig.maxOpenTrades = 1;
-            strategyConfig.enableTrading = true;
-            strategyConfig.magicNumber = EA_MAGIC_NUMBER + 2;
-            
-            gbpusdStrategy.SetConfig(strategyConfig);
-            
-            if(m_strategyDispatcher.RegisterStrategy(gbpusdStrategy))
-            {
-                m_logger.Info("✓ GBPUSD Breakout strategy registered", "EAEngine");
-                Print("    ✓ GBPUSD M30 Breakout Active");
-                registeredCount++;
-            }
-            else
-            {
-                m_logger.Error("✗ Failed to register GBPUSD Breakout strategy", "EAEngine");
-                Print("    ✗ GBPUSD M30 Breakout Failed");
-                delete gbpusdStrategy;
-            }
+             // Strategy 3: London Breakout
+             CGBPUSD_Strategy3_London_Breakout* gbpusd3 = new CGBPUSD_Strategy3_London_Breakout(m_logger, m_riskManager);
+             StrategyConfig configG3;
+             configG3.symbol = CSymbolManager::GetCorrectSymbol("GBPUSD");
+             configG3.timeframe = PERIOD_M15;
+             configG3.strategyType = STRATEGY_BREAKOUT;
+             configG3.riskPercent = 1.0;
+             configG3.maxOpenTrades = 1;
+             configG3.enableTrading = true;
+             configG3.magicNumber = EA_MAGIC_NUMBER + 203;
+             gbpusd3.SetConfig(configG3);
+             if(m_strategyDispatcher.RegisterStrategy(gbpusd3)) 
+             {
+                 Print("    ✓ GBPUSD Strategy 3 (London Breakout) Active");
+                 registeredCount++;
+             }
+             else delete gbpusd3;
         }
         
-        // 3. BTCUSD Momentum Strategy (Crypto)
-        if(m_config.enableMeanReversion)  // Using this flag for crypto
+        // 3. USDJPY Strategies
+        if(m_config.enableTrendFollowing)
         {
-            Print("  → Registering BTCUSD Momentum...");
-            CBTCUSDMomentum* btcStrategy = new CBTCUSDMomentum(m_logger, m_riskManager);
-            
-            StrategyConfig strategyConfig;
-            strategyConfig.symbol = CSymbolManager::GetCorrectSymbol("BTCUSD");
-            strategyConfig.timeframe = PERIOD_M30;
-            strategyConfig.strategyType = STRATEGY_MOMENTUM;
-            strategyConfig.riskPercent = 1.0;  // Lower risk for crypto
-            strategyConfig.maxOpenTrades = 1;
-            strategyConfig.enableTrading = true;
-            strategyConfig.magicNumber = EA_MAGIC_NUMBER + 3;
-            
-            btcStrategy.SetConfig(strategyConfig);
-            
-            if(m_strategyDispatcher.RegisterStrategy(btcStrategy))
+            // Strategy 1: ADX Trend
+            CUSDJPY_Strategy1_ADX_Trend* usdjpy1 = new CUSDJPY_Strategy1_ADX_Trend(m_logger, m_riskManager);
+            StrategyConfig configJ1;
+            configJ1.symbol = CSymbolManager::GetCorrectSymbol("USDJPY");
+            configJ1.timeframe = PERIOD_H4;
+            configJ1.strategyType = STRATEGY_TREND_FOLLOWING;
+            configJ1.riskPercent = 1.5;
+            configJ1.maxOpenTrades = 1;
+            configJ1.enableTrading = true;
+            configJ1.magicNumber = EA_MAGIC_NUMBER + 301;
+            usdjpy1.SetConfig(configJ1);
+            if(m_strategyDispatcher.RegisterStrategy(usdjpy1)) 
             {
-                m_logger.Info("✓ BTCUSD Momentum strategy registered", "EAEngine");
-                Print("    ✓ BTCUSD M30 Momentum Active");
+                Print("    ✓ USDJPY Strategy 1 (ADX Trend) Active");
                 registeredCount++;
             }
-            else
+            else delete usdjpy1;
+            
+            // Strategy 2: Carry Trade
+            CUSDJPY_Strategy2_Carry_Trade* usdjpy2 = new CUSDJPY_Strategy2_Carry_Trade(m_logger, m_riskManager);
+            StrategyConfig configJ2;
+            configJ2.symbol = CSymbolManager::GetCorrectSymbol("USDJPY");
+            configJ2.timeframe = PERIOD_D1;
+            configJ2.strategyType = STRATEGY_TREND_FOLLOWING; 
+            configJ2.riskPercent = 2.0;
+            configJ2.maxOpenTrades = 1;
+            configJ2.enableTrading = true;
+            configJ2.magicNumber = EA_MAGIC_NUMBER + 302;
+            usdjpy2.SetConfig(configJ2);
+            if(m_strategyDispatcher.RegisterStrategy(usdjpy2)) 
             {
-                m_logger.Error("✗ Failed to register BTCUSD Momentum strategy", "EAEngine");
-                Print("    ✗ BTCUSD M30 Momentum Failed");
-                delete btcStrategy;
+                Print("    ✓ USDJPY Strategy 2 (Carry Trade) Active");
+                registeredCount++;
             }
+            else delete usdjpy2;
         }
         
-        // 4. XAUUSD Scalping Strategy (Gold)
-        if(m_config.enableScalping)
-        {
-            Print("  → Registering XAUUSD Scalping...");
-            CXAUUSDScalping* goldStrategy = new CXAUUSDScalping(m_logger, m_riskManager);
-            
-            StrategyConfig strategyConfig;
-            strategyConfig.symbol = CSymbolManager::GetCorrectSymbol("XAUUSD");
-            strategyConfig.timeframe = PERIOD_M15;
-            strategyConfig.strategyType = STRATEGY_SCALPING;
-            strategyConfig.riskPercent = 1.0;
-            strategyConfig.maxOpenTrades = 2;  // Allow 2 scalp positions
-            strategyConfig.enableTrading = true;
-            strategyConfig.magicNumber = EA_MAGIC_NUMBER + 4;
-            
-            goldStrategy.SetConfig(strategyConfig);
-            
-            if(m_strategyDispatcher.RegisterStrategy(goldStrategy))
-            {
-                m_logger.Info("✓ XAUUSD Scalping strategy registered", "EAEngine");
-                Print("    ✓ XAUUSD M15 Scalping Active");
-                registeredCount++;
-            }
-            else
-            {
-                m_logger.Error("✗ Failed to register XAUUSD Scalping strategy", "EAEngine");
-                Print("    ✗ XAUUSD M15 Scalping Failed");
-                delete goldStrategy;
-            }
-        }
-        
-        // 5. SP500 Mean Reversion Strategy (Indices)
-        if(m_config.enableIndices)
-        {
-            Print("  → Registering SP500 Mean Reversion...");
-            CSP500MeanReversion* sp500Strategy = new CSP500MeanReversion(m_logger, m_riskManager);
-            
-            StrategyConfig strategyConfig;
-            strategyConfig.symbol = CSymbolManager::GetCorrectSymbol("SP500");
-            strategyConfig.timeframe = PERIOD_H1;
-            strategyConfig.strategyType = STRATEGY_MEAN_REVERSION;
-            strategyConfig.riskPercent = 1.0;
-            strategyConfig.maxOpenTrades = 1;
-            strategyConfig.enableTrading = true;
-            strategyConfig.magicNumber = EA_MAGIC_NUMBER + 5;
-            
-            sp500Strategy.SetConfig(strategyConfig);
-            
-            if(m_strategyDispatcher.RegisterStrategy(sp500Strategy))
-            {
-                m_logger.Info("✓ SP500 Mean Reversion strategy registered", "EAEngine");
-                Print("    ✓ SP500 H1 Mean Reversion Active");
-                registeredCount++;
-            }
-            else
-            {
-                m_logger.Error("✗ Failed to register SP500 Mean Reversion strategy", "EAEngine");
-                Print("    ✗ SP500 H1 Mean Reversion Failed");
-                delete sp500Strategy;
-            }
-        }
+         // 4. BTCUSD Momentum Strategy (Crypto)
+         if(m_config.enableMeanReversion)  // Using this flag for crypto
+         {
+             Print("  → BTCUSD Momentum Strategy disabled (Pending implementation based on CRYPTO_Strategy_Audit.md)...");
+             // Pending new implementation
+         }
+         
+         // 4. XAUUSD Scalping Strategy (Gold)
+         if(m_config.enableScalping)
+         {
+             Print("  → XAUUSD Scalping Strategy disabled (Pending implementation based on METALS_Strategy_Audit.md)...");
+             // Pending new implementation
+         }
+         
+         // 5. SP500 Mean Reversion Strategy (Indices)
+         if(m_config.enableIndices)
+         {
+             Print("  → SP500 Mean Reversion Strategy disabled (Pending implementation based on INDICES_Strategy_Audit.md)...");
+             // Pending new implementation
+         }
         
         Print("");  // Blank line
         m_logger.Info(StringFormat("Strategy registration complete: %d strategies active", registeredCount), "EAEngine");

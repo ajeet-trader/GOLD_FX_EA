@@ -560,7 +560,7 @@ Once all tests pass:
 3. **Prepare for Phase 2**
    - Review Phase 2 requirements (Strategy Foundation)
    - Set up development environment for indicators
-   - Plan first strategy implementation (EURUSD Trend Following)
+   - Review strategy research in `Docs\Research\FOREX_Strategy_Audit.md`
 
 4. **Backup Your Work**
    - Backup entire `MQL5\Experts\GOLDFXEA_Experts\` folder

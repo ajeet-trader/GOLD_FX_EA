@@ -353,9 +353,10 @@ By studying and implementing Phase 1, you've learned:
 
 ### After Phase 1 Validation:
 1. **Review Phase 2 Requirements** in `jules_master_prompt.md`
-2. **Plan First Strategy** (EURUSD H1 Trend-Following recommended)
+2. **Plan First Strategy** (Refer to `Docs\Research\FOREX_Strategy_Audit.md`)
 3. **Study Indicator Requirements** (EMA, MACD, ADX needed first)
 4. **Prepare Development Environment** for next phase
+5. **Review Strategy Research** in `Docs\Research\` folder
 
 ### Version Control (Recommended):
 ```bash
