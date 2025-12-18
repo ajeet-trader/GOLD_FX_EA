@@ -17,10 +17,10 @@ private:
     int m_stochPeriod;
     int m_emaTrendPeriod;
     
-    int m_handleRSI;
+    // int m_handleRSI; // Use base
     int m_handleEMA_Trend; // 4H
     
-    double m_rsi[];
+    // double m_rsi[]; // Use base
     double m_emaTrend[];
     
     datetime m_lastBarTime;

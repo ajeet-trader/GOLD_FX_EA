@@ -18,15 +18,17 @@ private:
     int m_rsiPeriod;
     int m_volMaPeriod;
     
-    int m_handleBB;
-    int m_handleRSI;
+    // Base class members used instead of redeclaring
+    // int m_handleBB; // Use m_handleBB from base
+    // int m_handleRSI; // Use m_handleRSI from base
     int m_handleVolumes;
     int m_handleVolMA;
     
-    double m_bbUpper[];
-    double m_bbLower[];
-    double m_bbMid[];
-    double m_rsi[];
+    // Base class members used instead of redeclaring
+    // double m_bbUpper[]; // Use m_bbUpper from base
+    // double m_bbLower[]; // Use m_bbLower from base
+    double m_bbMid[]; // Use m_bbMiddle from base if available, else local
+    // double m_rsi[]; // Use m_rsi from base
     double m_volMA[];
     long m_volumes[];
     

@@ -20,13 +20,13 @@ private:
     
     int m_handleEMA_Trend; // 50
     int m_handleEMA_LongTerm; // 200
-    int m_handleRSI;
+    // int m_handleRSI; // Use base
     int m_handleVolumes;
     int m_handleVolMA;
     
     double m_emaTrend[];
     double m_emaLongTerm[]; // Daily?
-    double m_rsi[];
+    // double m_rsi[]; // Use base
     double m_volMA[];
     long m_volumes[];
     

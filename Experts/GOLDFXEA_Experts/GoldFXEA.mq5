@@ -26,12 +26,24 @@ input double   MaxDailyLoss = 5.0;                // Max Daily Loss (%)
 input double   MaxDrawdown = 20.0;                // Max Drawdown (%)
 input int      MaxOpenTrades = 10;                // Max Open Trades
 
-input group "=== Strategy Selection ==="
-input bool     EnableTrendFollowing = true;       // Trend Following (EURUSD, H1)
-input bool     EnableBreakout = false;            // Breakout (GBPUSD, M30)
-input bool     EnableMeanReversion = false;       // Momentum (BTCUSD, M30)
-input bool     EnableScalping = false;            // Scalping (XAUUSD, M15)
-input bool     EnableIndices = false;             // Mean Reversion (SP500, H1)
+input group "=== EURUSD Strategies ==="
+input bool     Enable_EURUSD_Strat1 = false;      // Strategy 1: EMA RSI (Trend)
+input bool     Enable_EURUSD_Strat2 = false;      // Strategy 2: Bollinger MeanRev
+input bool     Enable_EURUSD_Strat3 = false;      // Strategy 3: ADX Trend
+
+input group "=== GBPUSD Strategies ==="
+input bool     Enable_GBPUSD_Strat1 = false;      // Strategy 1: Fib Pullback (Trend)
+input bool     Enable_GBPUSD_Strat2 = false;      // Strategy 2: RSI MeanRev
+input bool     Enable_GBPUSD_Strat3 = false;      // Strategy 3: London Breakout
+
+input group "=== USDJPY Strategies ==="
+input bool     Enable_USDJPY_Strat1 = false;      // Strategy 1: ADX Trend
+input bool     Enable_USDJPY_Strat2 = false;      // Strategy 2: Carry Trade
+
+input group "=== Other Strategies ==="
+input bool     Enable_BTCUSD_Momentum = false;    // BTCUSD Momentum (Pending)
+input bool     Enable_XAUUSD_Scalping = false;    // XAUUSD Scalping (Pending)
+input bool     Enable_SP500_MeanRev = false;      // SP500 MeanRev (Pending)
 
 //+------------------------------------------------------------------+
 //| Global Variables                                                  |
@@ -67,11 +79,19 @@ int OnInit()
     config.maxDailyLoss = MaxDailyLoss;
     config.maxDrawdown = MaxDrawdown;
     config.maxOpenTrades = MaxOpenTrades;
-    config.enableTrendFollowing = EnableTrendFollowing;
-    config.enableBreakout = EnableBreakout;
-    config.enableMeanReversion = EnableMeanReversion;
-    config.enableScalping = EnableScalping;
-    config.enableIndices = EnableIndices;
+    
+    // Map Strategy Inputs
+    config.enable_EURUSD_Strat1 = Enable_EURUSD_Strat1;
+    config.enable_EURUSD_Strat2 = Enable_EURUSD_Strat2;
+    config.enable_EURUSD_Strat3 = Enable_EURUSD_Strat3;
+    config.enable_GBPUSD_Strat1 = Enable_GBPUSD_Strat1;
+    config.enable_GBPUSD_Strat2 = Enable_GBPUSD_Strat2;
+    config.enable_GBPUSD_Strat3 = Enable_GBPUSD_Strat3;
+    config.enable_USDJPY_Strat1 = Enable_USDJPY_Strat1;
+    config.enable_USDJPY_Strat2 = Enable_USDJPY_Strat2;
+    config.enable_BTCUSD_Momentum = Enable_BTCUSD_Momentum;
+    config.enable_XAUUSD_Scalping = Enable_XAUUSD_Scalping;
+    config.enable_SP500_MeanRev = Enable_SP500_MeanRev;
     
     // Initialize EA engine
     if(!g_engine.Initialize(config))

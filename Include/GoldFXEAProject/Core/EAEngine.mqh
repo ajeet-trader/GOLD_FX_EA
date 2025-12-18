@@ -200,9 +200,10 @@ public:
         int registeredCount = 0;
         
         // 1. EURUSD Strategies
-        if(m_config.enableTrendFollowing)
+        
+        // Strategy 1: EMA RSI
+        if(m_config.enable_EURUSD_Strat1)
         {
-            // Strategy 1: EMA RSI
             CEURUSD_Strategy1_EMA_RSI* eurusd1 = new CEURUSD_Strategy1_EMA_RSI(m_logger, m_riskManager);
             StrategyConfig config1;
             config1.symbol = CSymbolManager::GetCorrectSymbol("EURUSD");
@@ -219,8 +220,32 @@ public:
                 registeredCount++;
             }
             else delete eurusd1;
+        }
             
-            // Strategy 3: ADX Trend
+        // Strategy 2: Bollinger Mean Reversion
+        if(m_config.enable_EURUSD_Strat2)
+        {
+            CEURUSD_Strategy2_Bollinger_MeanReversion* eurusd2 = new CEURUSD_Strategy2_Bollinger_MeanReversion(m_logger, m_riskManager);
+            StrategyConfig config2;
+            config2.symbol = CSymbolManager::GetCorrectSymbol("EURUSD");
+            config2.timeframe = PERIOD_M30;
+            config2.strategyType = STRATEGY_MEAN_REVERSION;
+            config2.riskPercent = 1.5;
+            config2.maxOpenTrades = 1;
+            config2.enableTrading = true;
+            config2.magicNumber = EA_MAGIC_NUMBER + 102;
+            eurusd2.SetConfig(config2);
+            if(m_strategyDispatcher.RegisterStrategy(eurusd2)) 
+            {
+                Print("    ✓ EURUSD Strategy 2 (Bollinger MeanRev) Active");
+                registeredCount++;
+            }
+            else delete eurusd2;
+        }
+
+        // Strategy 3: ADX Trend
+        if(m_config.enable_EURUSD_Strat3)
+        {
             CEURUSD_Strategy3_ADX_Trend* eurusd3 = new CEURUSD_Strategy3_ADX_Trend(m_logger, m_riskManager);
             StrategyConfig config3;
             config3.symbol = CSymbolManager::GetCorrectSymbol("EURUSD");
@@ -239,31 +264,11 @@ public:
             else delete eurusd3;
         }
         
-        if(m_config.enableMeanReversion)
-        {
-            // Strategy 2: Bollinger Mean Reversion
-            CEURUSD_Strategy2_Bollinger_MeanReversion* eurusd2 = new CEURUSD_Strategy2_Bollinger_MeanReversion(m_logger, m_riskManager);
-            StrategyConfig config2;
-            config2.symbol = CSymbolManager::GetCorrectSymbol("EURUSD");
-            config2.timeframe = PERIOD_M30;
-            config2.strategyType = STRATEGY_MEAN_REVERSION;
-            config2.riskPercent = 1.5;
-            config2.maxOpenTrades = 1;
-            config2.enableTrading = true;
-            config2.magicNumber = EA_MAGIC_NUMBER + 102;
-            eurusd2.SetConfig(config2);
-            if(m_strategyDispatcher.RegisterStrategy(eurusd2)) 
-            {
-                Print("    ✓ EURUSD Strategy 2 (Bollinger MeanRev) Active");
-                registeredCount++;
-            }
-            else delete eurusd2;
-        }
-        
         // 2. GBPUSD Strategies
-        if(m_config.enableTrendFollowing)
+        
+        // Strategy 1: Fib Pullback
+        if(m_config.enable_GBPUSD_Strat1)
         {
-             // Strategy 1: Fib Pullback
              CGBPUSD_Strategy1_Fib_Pullback* gbpusd1 = new CGBPUSD_Strategy1_Fib_Pullback(m_logger, m_riskManager);
              StrategyConfig configG1;
              configG1.symbol = CSymbolManager::GetCorrectSymbol("GBPUSD");
@@ -282,9 +287,9 @@ public:
              else delete gbpusd1;
         }
         
-        if(m_config.enableMeanReversion)
+        // Strategy 2: RSI Mean Reversion
+        if(m_config.enable_GBPUSD_Strat2)
         {
-             // Strategy 2: RSI Mean Reversion
              CGBPUSD_Strategy2_RSI_MeanReversion* gbpusd2 = new CGBPUSD_Strategy2_RSI_MeanReversion(m_logger, m_riskManager);
              StrategyConfig configG2;
              configG2.symbol = CSymbolManager::GetCorrectSymbol("GBPUSD");
@@ -303,9 +308,9 @@ public:
              else delete gbpusd2;
         }
         
-        if(m_config.enableBreakout)
+        // Strategy 3: London Breakout
+        if(m_config.enable_GBPUSD_Strat3)
         {
-             // Strategy 3: London Breakout
              CGBPUSD_Strategy3_London_Breakout* gbpusd3 = new CGBPUSD_Strategy3_London_Breakout(m_logger, m_riskManager);
              StrategyConfig configG3;
              configG3.symbol = CSymbolManager::GetCorrectSymbol("GBPUSD");
@@ -325,9 +330,10 @@ public:
         }
         
         // 3. USDJPY Strategies
-        if(m_config.enableTrendFollowing)
+        
+        // Strategy 1: ADX Trend
+        if(m_config.enable_USDJPY_Strat1)
         {
-            // Strategy 1: ADX Trend
             CUSDJPY_Strategy1_ADX_Trend* usdjpy1 = new CUSDJPY_Strategy1_ADX_Trend(m_logger, m_riskManager);
             StrategyConfig configJ1;
             configJ1.symbol = CSymbolManager::GetCorrectSymbol("USDJPY");
@@ -344,8 +350,11 @@ public:
                 registeredCount++;
             }
             else delete usdjpy1;
+        }
             
-            // Strategy 2: Carry Trade
+        // Strategy 2: Carry Trade
+        if(m_config.enable_USDJPY_Strat2)
+        {
             CUSDJPY_Strategy2_Carry_Trade* usdjpy2 = new CUSDJPY_Strategy2_Carry_Trade(m_logger, m_riskManager);
             StrategyConfig configJ2;
             configJ2.symbol = CSymbolManager::GetCorrectSymbol("USDJPY");
@@ -364,22 +373,20 @@ public:
             else delete usdjpy2;
         }
         
-         // 4. BTCUSD Momentum Strategy (Crypto)
-         if(m_config.enableMeanReversion)  // Using this flag for crypto
+         // 4. Other Strategies
+         if(m_config.enable_BTCUSD_Momentum)
          {
              Print("  → BTCUSD Momentum Strategy disabled (Pending implementation based on CRYPTO_Strategy_Audit.md)...");
              // Pending new implementation
          }
          
-         // 4. XAUUSD Scalping Strategy (Gold)
-         if(m_config.enableScalping)
+         if(m_config.enable_XAUUSD_Scalping)
          {
              Print("  → XAUUSD Scalping Strategy disabled (Pending implementation based on METALS_Strategy_Audit.md)...");
              // Pending new implementation
          }
          
-         // 5. SP500 Mean Reversion Strategy (Indices)
-         if(m_config.enableIndices)
+         if(m_config.enable_SP500_MeanRev)
          {
              Print("  → SP500 Mean Reversion Strategy disabled (Pending implementation based on INDICES_Strategy_Audit.md)...");
              // Pending new implementation

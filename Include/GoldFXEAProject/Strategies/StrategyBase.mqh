@@ -155,6 +155,12 @@ public:
         return true;
     }
     
+    // Get market condition
+    virtual string GetMarketCondition() override
+    {
+        return "Unknown";
+    }
+    
     // Count open positions for this strategy
     int CountOpenPositions()
     {

@@ -73,11 +73,17 @@ struct EAConfig
     double maxDailyLoss;
     double maxDrawdown;
     int maxOpenTrades;
-    bool enableTrendFollowing;
-    bool enableBreakout;
-    bool enableMeanReversion;
-    bool enableScalping;
-    bool enableIndices;
+    bool enable_EURUSD_Strat1;
+    bool enable_EURUSD_Strat2;
+    bool enable_EURUSD_Strat3;
+    bool enable_GBPUSD_Strat1;
+    bool enable_GBPUSD_Strat2;
+    bool enable_GBPUSD_Strat3;
+    bool enable_USDJPY_Strat1;
+    bool enable_USDJPY_Strat2;
+    bool enable_BTCUSD_Momentum;
+    bool enable_XAUUSD_Scalping;
+    bool enable_SP500_MeanRev;
     
     // Constructor with default values
     EAConfig()
@@ -89,11 +95,18 @@ struct EAConfig
         maxDailyLoss = 5.0;
         maxDrawdown = 20.0;
         maxOpenTrades = 10;
-        enableTrendFollowing = true;
-        enableBreakout = false;
-        enableMeanReversion = false;
-        enableScalping = false;
-        enableIndices = false;
+        
+        enable_EURUSD_Strat1 = false;
+        enable_EURUSD_Strat2 = false;
+        enable_EURUSD_Strat3 = false;
+        enable_GBPUSD_Strat1 = false;
+        enable_GBPUSD_Strat2 = false;
+        enable_GBPUSD_Strat3 = false;
+        enable_USDJPY_Strat1 = false;
+        enable_USDJPY_Strat2 = false;
+        enable_BTCUSD_Momentum = false;
+        enable_XAUUSD_Scalping = false;
+        enable_SP500_MeanRev = false;
     }
 };
 
