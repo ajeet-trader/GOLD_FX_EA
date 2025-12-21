@@ -18,7 +18,7 @@ EA_REL_PATH = r"GOLDFXEA_Experts\GoldFXEA.ex5"
 EA_SOURCE_REL_PATH = r"GOLDFXEA_Experts\GoldFXEA.mq5"
 EA_PATH = EA_REL_PATH # For config file
 
-OUTPUT_DIR = os.path.join(PROJECT_ROOT, "backtest_results")
+OUTPUT_DIR = os.path.join(PROJECT_ROOT, "Backtest_Reports")
 
 # Strategy Definitions
 # Based on EA comments:
@@ -37,6 +37,13 @@ STRATEGIES = [
     {"name": "GBPUSD_Strategy3_London_Breakout", "symbol": "GBPUSD", "period": "M15", "input": "Enable_GBPUSD_Strat3"},
     {"name": "USDJPY_Strategy1_ADX_Trend", "symbol": "USDJPY", "period": "H4", "input": "Enable_USDJPY_Strat1"},
     {"name": "USDJPY_Strategy2_Carry_Trade", "symbol": "USDJPY", "period": "D1", "input": "Enable_USDJPY_Strat2"},
+    # Metals
+    {"name": "XAUUSD_Strategy1_ADX_Trend", "symbol": "XAUUSD", "period": "H1", "input": "Enable_XAUUSD_Strat1"},
+    {"name": "XAUUSD_Strategy2_Bollinger_MeanReversion", "symbol": "XAUUSD", "period": "M15", "input": "Enable_XAUUSD_Strat2"},
+    {"name": "XAUUSD_Strategy3_Keltner_Scalp", "symbol": "XAUUSD", "period": "M5", "input": "Enable_XAUUSD_Strat3"},
+    # Remaining Forex
+    {"name": "EURGBP_Strategy1_SMA_Trend", "symbol": "EURGBP", "period": "H4", "input": "Enable_EURGBP_Strat1"},
+    {"name": "AUDUSD_Strategy1_Breakout_MeanReversion", "symbol": "AUDUSD", "period": "H1", "input": "Enable_AUDUSD_Strat1"},
 ]
 
 # Backtest Settings
@@ -162,10 +169,8 @@ def create_ini_file(strategy_name, symbol, period, active_inputs, report_path):
     inputs["EnableTrading"] = "true"
     inputs["EnableLogging"] = "true"
     
-    # Use a safe path for report generation (C drive)
-    # MT5 cannot write directly to network/subst drives like J: in some environments.
-    # We generate it on C: then move it to the project folder.
-    safe_report_dir = r"C:\Users\gupta\Documents\BacktestReports"
+    # Use C:\Temp for reliability
+    safe_report_dir = r"C:\Temp\BacktestReports"
     if not os.path.exists(safe_report_dir):
         try:
             os.makedirs(safe_report_dir)
@@ -177,6 +182,9 @@ def create_ini_file(strategy_name, symbol, period, active_inputs, report_path):
     safe_report_path = os.path.join(safe_report_dir, f"{strategy_name}.html")
     
     print(f"Configuring report generation at: {safe_report_path}")
+    
+    # Use relative path for report to ensure it saves in MT5 Data Folder
+    report_filename = os.path.basename(safe_report_path)
     
     ini_content = f"""
 [Tester]
@@ -190,7 +198,7 @@ ExecutionMode={EXECUTION_MODE}
 Optimization={OPTIMIZATION}
 FromDate={FROM_DATE}
 ToDate={TO_DATE}
-Report={safe_report_path}
+Report={report_filename}
 ReplaceReport=1
 ShutdownTerminal=1
 
@@ -199,9 +207,17 @@ ShutdownTerminal=1
     for key, value in inputs.items():
         ini_content += f"{key}={value}\n"
         
-    ini_path = os.path.join(OUTPUT_DIR, f"{strategy_name}.ini")
+    ini_path = os.path.join(safe_report_dir, f"{strategy_name}.ini")
     with open(ini_path, "w") as f:
         f.write(ini_content)
+    
+    # Also save a copy to project folder for reference
+    try:
+        project_ini = os.path.join(OUTPUT_DIR, f"{strategy_name}.ini")
+        with open(project_ini, "w") as f:
+            f.write(ini_content)
+    except:
+        pass
     
     return ini_path, safe_report_path
 
@@ -261,34 +277,94 @@ def is_terminal_running():
     except:
         return False
 
-def run_backtest(terminal_path, ini_path):
+def run_backtest(terminal_path, ini_path, report_path):
     """Run the MT5 terminal with the given config."""
     # Ensure terminal is closed before starting
     kill_terminal()
     
-    cmd = f'"{terminal_path}" /config:"{ini_path}"'
+    # Remove existing report if any (to avoid false positives)
+    if os.path.exists(report_path):
+        try:
+            os.remove(report_path)
+        except:
+            pass
+            
+    cmd = [terminal_path, f"/config:{ini_path}"]
     print(f"Running: {cmd}")
-    process = subprocess.Popen(cmd, shell=True)
+    process = subprocess.Popen(cmd, shell=False)
     
-    # Wait for terminal to start (it takes a moment to appear in tasklist)
+    # Wait for terminal to start
     time.sleep(5)
     
-    # Poll until terminal closes
-    print("Waiting for backtest to complete...")
+    print("Waiting for backtest to complete (Monitoring report generation)...")
     start_time = time.time()
-    max_duration = 3600 # 1 hour max
+    max_duration = 600 # 10 mins max per strategy
+    
+    report_found = False
     
     while True:
-        if not is_terminal_running():
-            print("Terminal process ended.")
-            break
+        # 1. Check if report generated
+            # Check in MT5 Data Directory (primary location for relative paths)
+            report_filename = os.path.basename(report_path)
+            mt5_report_path = os.path.join(MT5_DATA_DIR, report_filename)
             
-        if time.time() - start_time > max_duration:
-            print("Timeout waiting for backtest.")
-            kill_terminal()
-            break
+            if os.path.exists(mt5_report_path) and os.path.getsize(mt5_report_path) > 0:
+                print(f"Report detected at {mt5_report_path}!")
+                # Give it a moment to finish writing
+                time.sleep(2)
+                try:
+                    # Move to destination
+                    shutil.move(mt5_report_path, report_path)
+                    print(f"Moved report to {report_path}")
+                    report_found = True
+                    break
+                except Exception as e:
+                    print(f"Error moving report: {e}")
+
+            # Check if it appeared at destination (if absolute path worked somehow)
+            if os.path.exists(report_path) and os.path.getsize(report_path) > 0:
+                print(f"Report detected at {report_path}!")
+                # Give it a moment to finish writing
+                time.sleep(5) 
+                report_found = True
+                break
             
-        time.sleep(2)
+            # Check in the tester directory for any html report if the specific one is not found
+            # Sometimes MT5 saves it with a different name or in the tester folder
+            tester_report_path = os.path.join(os.path.dirname(ini_path), "Report.html")
+            if os.path.exists(tester_report_path) and os.path.getsize(tester_report_path) > 0:
+                 print(f"Report detected at {tester_report_path} (default name)!")
+                 # Rename/Move it
+                 try:
+                     shutil.move(tester_report_path, report_path)
+                     report_found = True
+                     break
+                 except Exception as e:
+                     print(f"Error moving report: {e}")
+            
+            # 2. Check if terminal is still running
+            if not is_terminal_running():
+                print("Terminal process ended.")
+                break
+                
+            # 3. Timeout
+            if time.time() - start_time > max_duration:
+                print("Timeout waiting for backtest.")
+                kill_terminal()
+                break
+                
+            time.sleep(2)
+    
+    if report_found:
+        # If terminal is still running (it should close itself due to ShutdownTerminal=1, but if not...)
+        if is_terminal_running():
+            print("Report done, waiting for terminal to close self...")
+            time.sleep(10)
+            if is_terminal_running():
+                print("Force closing terminal.")
+                kill_terminal()
+    else:
+        print("Warning: Backtest finished but Report not found.")
     
     # Wait a bit to ensure file is written and process fully releases
     time.sleep(2) 
@@ -405,7 +481,7 @@ def main():
             report_path=report_file
         )
         
-        run_backtest(terminal_path, ini_path)
+        run_backtest(terminal_path, ini_path, safe_report_path)
         process_report(safe_report_path, strat['name'], terminal_path)
         
     # 2. Run Combined Strategy
@@ -430,7 +506,7 @@ def main():
         report_path=report_file
     )
     
-    run_backtest(terminal_path, ini_path)
+    run_backtest(terminal_path, ini_path, safe_report_path)
     process_report(safe_report_path, "Combined", terminal_path)
     
     print("\nAll backtests completed.")

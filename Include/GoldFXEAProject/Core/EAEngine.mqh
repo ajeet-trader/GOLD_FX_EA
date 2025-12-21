@@ -22,6 +22,72 @@
 #include <GoldFXEAProject/Strategies/Forex/USDJPY_Strategy1_ADX_Trend.mqh>
 #include <GoldFXEAProject/Strategies/Forex/USDJPY_Strategy2_Carry_Trade.mqh>
 
+// Metals Strategies
+#include <GoldFXEAProject/Strategies/Metals/XAUUSD_Strategy1_ADX_Trend.mqh>
+#include <GoldFXEAProject/Strategies/Metals/XAUUSD_Strategy2_Bollinger_MeanReversion.mqh>
+#include <GoldFXEAProject/Strategies/Metals/XAUUSD_Strategy3_Keltner_Scalp.mqh>
+
+// Remaining Forex Strategies
+#include <GoldFXEAProject/Strategies/Forex/EURGBP_Strategy1_SMA_Trend.mqh>
+#include <GoldFXEAProject/Strategies/Forex/AUDUSD_Strategy1_Breakout_MeanReversion.mqh>
+#include <GoldFXEAProject/Strategies/Forex/NZDUSD_Strategy1_Breakout.mqh>
+#include <GoldFXEAProject/Strategies/Forex/USDCHF_Strategy1_MeanReversion.mqh>
+#include <GoldFXEAProject/Strategies/Forex/USDCAD_Strategy1_Breakout.mqh>
+#include <GoldFXEAProject/Strategies/Forex/GBPJPY_Strategy1_Ichimoku.mqh>
+#include <GoldFXEAProject/Strategies/Forex/EURNZD_Strategy1_Scalp.mqh>
+
+// Crypto Strategies
+#include <GoldFXEAProject/Strategies/Crypto/BTCUSD_Strategy1_RSI_MACD.mqh>
+#include <GoldFXEAProject/Strategies/Crypto/BTCUSD_Strategy2_ATR_Breakout.mqh>
+#include <GoldFXEAProject/Strategies/Crypto/ETHUSD_Strategy1_False_Breakout.mqh>
+#include <GoldFXEAProject/Strategies/Crypto/ETHUSD_Strategy2_BTC_Aligned.mqh>
+#include <GoldFXEAProject/Strategies/Crypto/SOLUSD_Strategy1_Breakout.mqh>
+#include <GoldFXEAProject/Strategies/Crypto/XRPUSD_Strategy1_MeanRev.mqh>
+
+// Additional Metals Strategies
+#include <GoldFXEAProject/Strategies/Metals/XAGUSD_Strategy1_Breakout.mqh>
+#include <GoldFXEAProject/Strategies/Metals/XAUEUR_Strategy1_Trend.mqh>
+#include <GoldFXEAProject/Strategies/Metals/XAGUSD_Strategy2_VolatilityBreakout.mqh>
+#include <GoldFXEAProject/Strategies/Metals/XAUEUR_Strategy2_MeanReversion.mqh>
+
+// Energy Strategies
+#include <GoldFXEAProject/Strategies/Energy/USOIL_Strategy1_MeanReversion.mqh>
+#include <GoldFXEAProject/Strategies/Energy/USOIL_Strategy2_TrendFollowing.mqh>
+#include <GoldFXEAProject/Strategies/Energy/UKOIL_Strategy1_ChannelBreakout.mqh>
+#include <GoldFXEAProject/Strategies/Energy/NATGAS_Strategy1_VolatilitySqueeze.mqh>
+#include <GoldFXEAProject/Strategies/Energy/NATGAS_Strategy2_MeanReversion.mqh>
+#include <GoldFXEAProject/Strategies/Energy/COPPER_Strategy1_EMA_Crossover.mqh>
+#include <GoldFXEAProject/Strategies/Energy/COPPER_Strategy2_BollingerBreakout.mqh>
+
+// Indices Strategies
+#include <GoldFXEAProject/Strategies/Indices/US500_Strategy1_MeanReversion.mqh>
+#include <GoldFXEAProject/Strategies/Indices/USTEC_Strategy1_ADX_Trend.mqh>
+#include <GoldFXEAProject/Strategies/Indices/DE30_Strategy1_ADX_Trend.mqh>
+#include <GoldFXEAProject/Strategies/Indices/US30_Strategy1_MeanReversion.mqh>
+
+// New Crypto Strategies
+#include <GoldFXEAProject/Strategies/Crypto/LTCUSD_Strategy1_Momentum.mqh>
+#include <GoldFXEAProject/Strategies/Crypto/LTCUSD_Strategy2_BTC_Anchored.mqh>
+#include <GoldFXEAProject/Strategies/Crypto/ADAUSD_Strategy1_TrendFollowing.mqh>
+
+// New Forex Strategies
+#include <GoldFXEAProject/Strategies/Forex/CADJPY_Strategy1_TrendLineBreak.mqh>
+#include <GoldFXEAProject/Strategies/Forex/CHFJPY_Strategy1_MomentumBreakout.mqh>
+#include <GoldFXEAProject/Strategies/Forex/AUDNZD_Strategy1_BreakoutPullback.mqh>
+
+// Final Audit Strategies - Indices
+#include <GoldFXEAProject/Strategies/Indices/JP225_Strategy1_MACD_Optimized.mqh>
+#include <GoldFXEAProject/Strategies/Indices/FTSE100_Strategy1_MeanReversion.mqh>
+#include <GoldFXEAProject/Strategies/Indices/AUS200_Strategy1_EMA_ADX.mqh>
+#include <GoldFXEAProject/Strategies/Indices/FRA40_Strategy1_MACD_EMA.mqh>
+
+// Final Audit Strategies - Forex
+#include <GoldFXEAProject/Strategies/Forex/GBPNZD_Strategy1_CorrelationReversal.mqh>
+
+// Final Audit Strategies - Metals
+#include <GoldFXEAProject/Strategies/Metals/XAGUSD_Strategy3_MeanReversion.mqh>
+#include <GoldFXEAProject/Strategies/Metals/XAGUSD_Strategy4_PairsTrading.mqh>
+
 //+------------------------------------------------------------------+
 //| CEAEngine Class                                                  |
 //| Main orchestration engine for the entire EA                      |
@@ -372,26 +438,505 @@ public:
             }
             else delete usdjpy2;
         }
+
+        // 4. Metals Strategies (XAUUSD)
         
-         // 4. Other Strategies
-         if(m_config.enable_BTCUSD_Momentum)
-         {
-             Print("  → BTCUSD Momentum Strategy disabled (Pending implementation based on CRYPTO_Strategy_Audit.md)...");
-             // Pending new implementation
-         }
-         
-         if(m_config.enable_XAUUSD_Scalping)
-         {
-             Print("  → XAUUSD Scalping Strategy disabled (Pending implementation based on METALS_Strategy_Audit.md)...");
-             // Pending new implementation
-         }
-         
-         if(m_config.enable_SP500_MeanRev)
-         {
-             Print("  → SP500 Mean Reversion Strategy disabled (Pending implementation based on INDICES_Strategy_Audit.md)...");
-             // Pending new implementation
-         }
+        // Strategy 1: ADX Trend
+        if(m_config.enable_XAUUSD_Strat1)
+        {
+            CXAUUSD_Strategy1_ADX_Trend* xauusd1 = new CXAUUSD_Strategy1_ADX_Trend(m_logger, m_riskManager);
+            StrategyConfig configX1;
+            configX1.symbol = CSymbolManager::GetCorrectSymbol("XAUUSD");
+            configX1.timeframe = PERIOD_H1;
+            configX1.strategyType = STRATEGY_TREND_FOLLOWING;
+            configX1.riskPercent = 1.0;
+            configX1.maxOpenTrades = 1;
+            configX1.enableTrading = true;
+            configX1.magicNumber = EA_MAGIC_NUMBER + 401;
+            xauusd1.SetConfig(configX1);
+            if(m_strategyDispatcher.RegisterStrategy(xauusd1)) 
+            {
+                Print("    ✓ XAUUSD Strategy 1 (ADX Trend) Active");
+                registeredCount++;
+            }
+            else delete xauusd1;
+        }
+
+        // Strategy 2: Bollinger Mean Reversion
+        if(m_config.enable_XAUUSD_Strat2)
+        {
+            CXAUUSD_Strategy2_Bollinger_MeanReversion* xauusd2 = new CXAUUSD_Strategy2_Bollinger_MeanReversion(m_logger, m_riskManager);
+            StrategyConfig configX2;
+            configX2.symbol = CSymbolManager::GetCorrectSymbol("XAUUSD");
+            configX2.timeframe = PERIOD_M15;
+            configX2.strategyType = STRATEGY_MEAN_REVERSION;
+            configX2.riskPercent = 1.5;
+            configX2.maxOpenTrades = 1;
+            configX2.enableTrading = true;
+            configX2.magicNumber = EA_MAGIC_NUMBER + 402;
+            xauusd2.SetConfig(configX2);
+            if(m_strategyDispatcher.RegisterStrategy(xauusd2)) 
+            {
+                Print("    ✓ XAUUSD Strategy 2 (Bollinger MeanRev) Active");
+                registeredCount++;
+            }
+            else delete xauusd2;
+        }
+
+        // Strategy 3: Keltner Scalp
+        if(m_config.enable_XAUUSD_Strat3)
+        {
+            CXAUUSD_Strategy3_Keltner_Scalp* xauusd3 = new CXAUUSD_Strategy3_Keltner_Scalp(m_logger, m_riskManager);
+            StrategyConfig configX3;
+            configX3.symbol = CSymbolManager::GetCorrectSymbol("XAUUSD");
+            configX3.timeframe = PERIOD_M5;
+            configX3.strategyType = STRATEGY_SCALPING;
+            configX3.riskPercent = 1.0;
+            configX3.maxOpenTrades = 1;
+            configX3.enableTrading = true;
+            configX3.magicNumber = EA_MAGIC_NUMBER + 403;
+            xauusd3.SetConfig(configX3);
+            if(m_strategyDispatcher.RegisterStrategy(xauusd3)) 
+            {
+                Print("    ✓ XAUUSD Strategy 3 (Keltner Scalp) Active");
+                registeredCount++;
+            }
+            else delete xauusd3;
+        }
+
+        // 5. Remaining Forex Strategies
         
+        // EURGBP Strategy 1: SMA Trend
+        if(m_config.enable_EURGBP_Strat1)
+        {
+            CEURGBP_Strategy1_SMA_Trend* eurgbp1 = new CEURGBP_Strategy1_SMA_Trend(m_logger, m_riskManager);
+            StrategyConfig configEG1;
+            configEG1.symbol = CSymbolManager::GetCorrectSymbol("EURGBP");
+            configEG1.timeframe = PERIOD_H4;
+            configEG1.strategyType = STRATEGY_TREND_FOLLOWING;
+            configEG1.riskPercent = 1.5;
+            configEG1.maxOpenTrades = 1;
+            configEG1.enableTrading = true;
+            configEG1.magicNumber = EA_MAGIC_NUMBER + 701;
+            eurgbp1.SetConfig(configEG1);
+            if(m_strategyDispatcher.RegisterStrategy(eurgbp1)) 
+            {
+                Print("    ✓ EURGBP Strategy 1 (SMA Trend) Active");
+                registeredCount++;
+            }
+            else delete eurgbp1;
+        }
+
+        // AUDUSD Strategy 1: Breakout Mean Reversion
+        if(m_config.enable_AUDUSD_Strat1)
+        {
+            CAUDUSD_Strategy1_Breakout_MeanReversion* audusd1 = new CAUDUSD_Strategy1_Breakout_MeanReversion(m_logger, m_riskManager);
+            StrategyConfig configAU1;
+            configAU1.symbol = CSymbolManager::GetCorrectSymbol("AUDUSD");
+            configAU1.timeframe = PERIOD_H1;
+            configAU1.strategyType = STRATEGY_MEAN_REVERSION;
+            configAU1.riskPercent = 1.0;
+            configAU1.maxOpenTrades = 1;
+            configAU1.enableTrading = true;
+            configAU1.magicNumber = EA_MAGIC_NUMBER + 702;
+            audusd1.SetConfig(configAU1);
+            if(m_strategyDispatcher.RegisterStrategy(audusd1)) 
+            {
+                Print("    ✓ AUDUSD Strategy 1 (Breakout MeanRev) Active");
+                registeredCount++;
+            }
+            else delete audusd1;
+        }
+
+        // NZDUSD Strategy 1: Breakout
+        if(m_config.enable_NZDUSD_Strat1)
+        {
+            CNZDUSD_Strategy1_Breakout* nzdusd1 = new CNZDUSD_Strategy1_Breakout(m_logger, m_riskManager);
+            if(m_strategyDispatcher.RegisterStrategy(nzdusd1)) 
+            {
+                Print("    ✓ NZDUSD Strategy 1 (Breakout) Active");
+                registeredCount++;
+            }
+            else delete nzdusd1;
+        }
+
+        // USDCHF Strategy 1: Mean Reversion
+         if(m_config.enable_USDCHF_Strat1)
+         {
+             CUSDCHF_Strategy1_MeanReversion* usdchf1 = new CUSDCHF_Strategy1_MeanReversion(m_logger, m_riskManager);
+             if(m_strategyDispatcher.RegisterStrategy(usdchf1)) 
+             {
+                 Print("    ✓ USDCHF Strategy 1 (Mean Reversion) Active");
+                 registeredCount++;
+             }
+             else delete usdchf1;
+         }
+
+         // USDCAD Strategy 1: Breakout
+         if(m_config.enable_USDCAD_Strat1)
+         {
+             CUSDCAD_Strategy1_Breakout* usdcad1 = new CUSDCAD_Strategy1_Breakout(m_logger, m_riskManager);
+             if(m_strategyDispatcher.RegisterStrategy(usdcad1)) 
+             {
+                 Print("    ✓ USDCAD Strategy 1 (Breakout) Active");
+                 registeredCount++;
+             }
+             else delete usdcad1;
+         }
+
+         // GBPJPY Strategy 1: Ichimoku
+         if(m_config.enable_GBPJPY_Strat1)
+         {
+             CGBPJPY_Strategy1_Ichimoku* gbpjpy1 = new CGBPJPY_Strategy1_Ichimoku(m_logger, m_riskManager);
+             if(m_strategyDispatcher.RegisterStrategy(gbpjpy1)) 
+             {
+                 Print("    ✓ GBPJPY Strategy 1 (Ichimoku) Active");
+                 registeredCount++;
+             }
+             else delete gbpjpy1;
+         }
+
+         // EURNZD Strategy 1: Scalp
+         if(m_config.enable_EURNZD_Strat1)
+         {
+             CEURNZD_Strategy1_Scalp* eurnzd1 = new CEURNZD_Strategy1_Scalp(m_logger, m_riskManager);
+             if(m_strategyDispatcher.RegisterStrategy(eurnzd1)) 
+             {
+                 Print("    ✓ EURNZD Strategy 1 (Scalp) Active");
+                 registeredCount++;
+             }
+             else delete eurnzd1;
+         }
+
+         // 6. Crypto Strategies
+        
+        // BTCUSD Strategy 1: RSI MACD
+        if(m_config.enable_BTCUSD_Strat1)
+        {
+            CBTCUSD_Strategy1_RSI_MACD* btc1 = new CBTCUSD_Strategy1_RSI_MACD(m_logger, m_riskManager);
+            if(m_strategyDispatcher.RegisterStrategy(btc1)) 
+            {
+                Print("    ✓ BTCUSD Strategy 1 (RSI MACD) Active");
+                registeredCount++;
+            }
+            else delete btc1;
+        }
+
+        // BTCUSD Strategy 2: ATR Breakout
+        if(m_config.enable_BTCUSD_Strat2)
+        {
+            CBTCUSD_Strategy2_ATR_Breakout* btc2 = new CBTCUSD_Strategy2_ATR_Breakout(m_logger, m_riskManager);
+            if(m_strategyDispatcher.RegisterStrategy(btc2)) 
+            {
+                Print("    ✓ BTCUSD Strategy 2 (ATR Breakout) Active");
+                registeredCount++;
+            }
+            else delete btc2;
+        }
+
+        // ETHUSD Strategy 1: False Breakout
+        if(m_config.enable_ETHUSD_Strat1)
+        {
+            CETHUSD_Strategy1_False_Breakout* eth1 = new CETHUSD_Strategy1_False_Breakout(m_logger, m_riskManager);
+            if(m_strategyDispatcher.RegisterStrategy(eth1)) 
+            {
+                Print("    ✓ ETHUSD Strategy 1 (False Breakout) Active");
+                registeredCount++;
+            }
+            else delete eth1;
+        }
+
+        // SOLUSD Strategy 1: Breakout
+         if(m_config.enable_SOLUSD_Strat1)
+         {
+             CSOLUSD_Strategy1_Breakout* sol1 = new CSOLUSD_Strategy1_Breakout(m_logger, m_riskManager);
+             if(m_strategyDispatcher.RegisterStrategy(sol1)) 
+             {
+                 Print("    ✓ SOLUSD Strategy 1 (Breakout) Active");
+                 registeredCount++;
+             }
+             else delete sol1;
+         }
+
+         // XRPUSD Strategy 1: Mean Reversion
+         if(m_config.enable_XRPUSD_Strat1)
+         {
+             CXRPUSD_Strategy1_MeanRev* xrp1 = new CXRPUSD_Strategy1_MeanRev(m_logger, m_riskManager);
+             if(m_strategyDispatcher.RegisterStrategy(xrp1)) 
+             {
+                 Print("    ✓ XRPUSD Strategy 1 (Mean Reversion) Active");
+                 registeredCount++;
+             }
+             else delete xrp1;
+         }
+
+        // 7. Additional Metals Strategies
+        
+        // XAGUSD Strategy 1: Breakout
+        if(m_config.enable_XAGUSD_Strat1)
+        {
+            CXAGUSD_Strategy1_Breakout* xag1 = new CXAGUSD_Strategy1_Breakout(m_logger, m_riskManager);
+            if(m_strategyDispatcher.RegisterStrategy(xag1)) 
+            {
+                Print("    ✓ XAGUSD Strategy 1 (Breakout) Active");
+                registeredCount++;
+            }
+            else delete xag1;
+        }
+
+        // XAUEUR Strategy 1: Trend
+        if(m_config.enable_XAUEUR_Strat1)
+        {
+            CXAUEUR_Strategy1_Trend* xaueur1 = new CXAUEUR_Strategy1_Trend(m_logger, m_riskManager);
+            if(m_strategyDispatcher.RegisterStrategy(xaueur1)) 
+            {
+                Print("    ✓ XAUEUR Strategy 1 (Trend) Active");
+                registeredCount++;
+            }
+            else delete xaueur1;
+        }
+
+        // XAGUSD Strategy 2: Volatility Breakout
+        if(m_config.enable_XAGUSD_Strat2)
+        {
+            CXAGUSD_Strategy2_VolatilityBreakout* xag2 = new CXAGUSD_Strategy2_VolatilityBreakout(m_logger, m_riskManager);
+            if(m_strategyDispatcher.RegisterStrategy(xag2)) 
+            {
+                Print("    ✓ XAGUSD Strategy 2 (Volatility Breakout) Active");
+                registeredCount++;
+            }
+            else delete xag2;
+        }
+
+        // XAUEUR Strategy 2: Mean Reversion
+        if(m_config.enable_XAUEUR_Strat2)
+        {
+            CXAUEUR_Strategy2_MeanReversion* xaueur2 = new CXAUEUR_Strategy2_MeanReversion(m_logger, m_riskManager);
+            if(m_strategyDispatcher.RegisterStrategy(xaueur2)) 
+            {
+                Print("    ✓ XAUEUR Strategy 2 (Mean Reversion) Active");
+                registeredCount++;
+            }
+            else delete xaueur2;
+        }
+
+        // 8. Energy Strategies
+        
+        if(m_config.enable_USOIL_Strat1)
+        {
+            CUSOIL_Strategy1_MeanReversion* usoil1 = new CUSOIL_Strategy1_MeanReversion(m_logger, m_riskManager);
+            if(m_strategyDispatcher.RegisterStrategy(usoil1)) { Print("    ✓ USOIL Strategy 1 (MeanRev) Active"); registeredCount++; }
+            else delete usoil1;
+        }
+        if(m_config.enable_USOIL_Strat2)
+        {
+            CUSOIL_Strategy2_TrendFollowing* usoil2 = new CUSOIL_Strategy2_TrendFollowing(m_logger, m_riskManager);
+            if(m_strategyDispatcher.RegisterStrategy(usoil2)) { Print("    ✓ USOIL Strategy 2 (Trend) Active"); registeredCount++; }
+            else delete usoil2;
+        }
+        if(m_config.enable_UKOIL_Strat1)
+        {
+            CUKOIL_Strategy1_ChannelBreakout* ukoil1 = new CUKOIL_Strategy1_ChannelBreakout(m_logger, m_riskManager);
+            if(m_strategyDispatcher.RegisterStrategy(ukoil1)) { Print("    ✓ UKOIL Strategy 1 (Breakout) Active"); registeredCount++; }
+            else delete ukoil1;
+        }
+        if(m_config.enable_NATGAS_Strat1)
+        {
+            CNATGAS_Strategy1_VolatilitySqueeze* natgas1 = new CNATGAS_Strategy1_VolatilitySqueeze(m_logger, m_riskManager);
+            if(m_strategyDispatcher.RegisterStrategy(natgas1)) { Print("    ✓ NATGAS Strategy 1 (Squeeze) Active"); registeredCount++; }
+            else delete natgas1;
+        }
+        if(m_config.enable_NATGAS_Strat2)
+        {
+            CNATGAS_Strategy2_MeanReversion* natgas2 = new CNATGAS_Strategy2_MeanReversion(m_logger, m_riskManager);
+            if(m_strategyDispatcher.RegisterStrategy(natgas2)) { Print("    ✓ NATGAS Strategy 2 (MeanRev) Active"); registeredCount++; }
+            else delete natgas2;
+        }
+        if(m_config.enable_COPPER_Strat1)
+        {
+            CCOPPER_Strategy1_EMA_Crossover* copper1 = new CCOPPER_Strategy1_EMA_Crossover(m_logger, m_riskManager);
+            if(m_strategyDispatcher.RegisterStrategy(copper1)) { Print("    ✓ COPPER Strategy 1 (EMA) Active"); registeredCount++; }
+            else delete copper1;
+        }
+        if(m_config.enable_COPPER_Strat2)
+        {
+            CCOPPER_Strategy2_BollingerBreakout* copper2 = new CCOPPER_Strategy2_BollingerBreakout(m_logger, m_riskManager);
+            if(m_strategyDispatcher.RegisterStrategy(copper2)) { Print("    ✓ COPPER Strategy 2 (Bollinger) Active"); registeredCount++; }
+            else delete copper2;
+        }
+
+        // 9. Indices Strategies
+        
+        if(m_config.enable_US500_Strat1)
+        {
+            CUS500_Strategy1_MeanReversion* us500_1 = new CUS500_Strategy1_MeanReversion(m_logger, m_riskManager);
+            if(m_strategyDispatcher.RegisterStrategy(us500_1)) { Print("    ✓ US500 Strategy 1 (MeanRev) Active"); registeredCount++; }
+            else delete us500_1;
+        }
+        if(m_config.enable_USTEC_Strat1)
+        {
+            CUSTEC_Strategy1_ADX_Trend* ustec1 = new CUSTEC_Strategy1_ADX_Trend(m_logger, m_riskManager);
+            if(m_strategyDispatcher.RegisterStrategy(ustec1)) { Print("    ✓ USTEC Strategy 1 (ADX Trend) Active"); registeredCount++; }
+            else delete ustec1;
+        }
+        if(m_config.enable_DE30_Strat1)
+        {
+            CDE30_Strategy1_ADX_Trend* de30_1 = new CDE30_Strategy1_ADX_Trend(m_logger, m_riskManager);
+            if(m_strategyDispatcher.RegisterStrategy(de30_1)) { Print("    ✓ DE30 Strategy 1 (ADX Trend) Active"); registeredCount++; }
+            else delete de30_1;
+        }
+        if(m_config.enable_US30_Strat1)
+        {
+            CUS30_Strategy1_MeanReversion* us30_1 = new CUS30_Strategy1_MeanReversion(m_logger, m_riskManager);
+            if(m_strategyDispatcher.RegisterStrategy(us30_1)) { Print("    ✓ US30 Strategy 1 (MeanRev) Active"); registeredCount++; }
+            else delete us30_1;
+        }
+
+        // 10. New Crypto Strategies
+        if(m_config.enable_LTCUSD_Strat2)
+        {
+            CLTCUSD_Strategy2_BTC_Anchored* ltc2 = new CLTCUSD_Strategy2_BTC_Anchored(m_logger, m_riskManager);
+            if(m_strategyDispatcher.RegisterStrategy(ltc2)) { Print("    ✓ LTCUSD Strategy 2 (BTC-Anchored) Active"); registeredCount++; }
+            else delete ltc2;
+        }
+        if(m_config.enable_ETHUSD_Strat2)
+        {
+            CETHUSD_Strategy2_BTC_Aligned* eth2 = new CETHUSD_Strategy2_BTC_Aligned(m_logger, m_riskManager);
+            if(m_strategyDispatcher.RegisterStrategy(eth2)) { Print("    ✓ ETHUSD Strategy 2 (BTC-Aligned) Active"); registeredCount++; }
+            else delete eth2;
+        }
+        if(m_config.enable_LTCUSD_Strat1)
+        {
+            CLTCUSD_Strategy1_Momentum* ltc1 = new CLTCUSD_Strategy1_Momentum(m_logger, m_riskManager);
+            if(m_strategyDispatcher.RegisterStrategy(ltc1)) { Print("    ✓ LTCUSD Strategy 1 (Momentum) Active"); registeredCount++; }
+            else delete ltc1;
+        }
+        if(m_config.enable_ADAUSD_Strat1)
+        {
+            CADAUSD_Strategy1_TrendFollowing* ada1 = new CADAUSD_Strategy1_TrendFollowing(m_logger, m_riskManager);
+            if(m_strategyDispatcher.RegisterStrategy(ada1)) { Print("    ✓ ADAUSD Strategy 1 (Trend) Active"); registeredCount++; }
+            else delete ada1;
+        }
+
+        // 11. New Forex Strategies
+        if(m_config.enable_CADJPY_Strat1)
+        {
+            CCADJPY_Strategy1_TrendLineBreak* cadjpy1 = new CCADJPY_Strategy1_TrendLineBreak(m_logger, m_riskManager);
+            if(m_strategyDispatcher.RegisterStrategy(cadjpy1)) { Print("    ✓ CADJPY Strategy 1 (Breakout) Active"); registeredCount++; }
+            else delete cadjpy1;
+        }
+        if(m_config.enable_CHFJPY_Strat1)
+        {
+            CCHFJPY_Strategy1_MomentumBreakout* chfjpy1 = new CCHFJPY_Strategy1_MomentumBreakout(m_logger, m_riskManager);
+            if(m_strategyDispatcher.RegisterStrategy(chfjpy1)) { Print("    ✓ CHFJPY Strategy 1 (Momentum) Active"); registeredCount++; }
+            else delete chfjpy1;
+        }
+        if(m_config.enable_AUDNZD_Strat1)
+        {
+            CAUDNZD_Strategy1_BreakoutPullback* audnzd1 = new CAUDNZD_Strategy1_BreakoutPullback(m_logger, m_riskManager);
+            if(m_strategyDispatcher.RegisterStrategy(audnzd1)) { Print("    ✓ AUDNZD Strategy 1 (Pullback) Active"); registeredCount++; }
+            else delete audnzd1;
+        }
+
+        // 12. Final Audit Strategies
+        
+        // Indices
+        if(m_config.enable_JP225_Strat1)
+        {
+            CJP225_Strategy1_MACD_Optimized* jp225_1 = new CJP225_Strategy1_MACD_Optimized(m_logger, m_riskManager);
+            StrategyConfig cfg;
+            cfg.symbol = "JP225";
+            cfg.timeframe = PERIOD_H4;
+            cfg.strategyType = STRATEGY_TREND_FOLLOWING;
+            cfg.riskPercent = 1.0;
+            cfg.magicNumber = 7001;
+            jp225_1.SetConfig(cfg);
+            if(m_strategyDispatcher.RegisterStrategy(jp225_1)) { Print("    ✓ JP225 Strategy 1 (MACD) Active"); registeredCount++; }
+            else delete jp225_1;
+        }
+        if(m_config.enable_FTSE100_Strat1)
+        {
+            CFTSE100_Strategy1_MeanReversion* ftse1 = new CFTSE100_Strategy1_MeanReversion(m_logger, m_riskManager);
+            StrategyConfig cfg;
+            cfg.symbol = "FTSE100";
+            cfg.timeframe = PERIOD_H1;
+            cfg.strategyType = STRATEGY_MEAN_REVERSION;
+            cfg.riskPercent = 1.0;
+            cfg.magicNumber = 7002;
+            ftse1.SetConfig(cfg);
+            if(m_strategyDispatcher.RegisterStrategy(ftse1)) { Print("    ✓ FTSE100 Strategy 1 (MeanRev) Active"); registeredCount++; }
+            else delete ftse1;
+        }
+        if(m_config.enable_AUS200_Strat1)
+        {
+            CAUS200_Strategy1_EMA_ADX* aus200_1 = new CAUS200_Strategy1_EMA_ADX(m_logger, m_riskManager);
+            StrategyConfig cfg;
+            cfg.symbol = "AUS200";
+            cfg.timeframe = PERIOD_H4;
+            cfg.strategyType = STRATEGY_TREND_FOLLOWING;
+            cfg.riskPercent = 1.0;
+            cfg.magicNumber = 7003;
+            aus200_1.SetConfig(cfg);
+            if(m_strategyDispatcher.RegisterStrategy(aus200_1)) { Print("    ✓ AUS200 Strategy 1 (EMA ADX) Active"); registeredCount++; }
+            else delete aus200_1;
+        }
+        if(m_config.enable_FRA40_Strat1)
+        {
+            CFRA40_Strategy1_MACD_EMA* fra40_1 = new CFRA40_Strategy1_MACD_EMA(m_logger, m_riskManager);
+            StrategyConfig cfg;
+            cfg.symbol = "FRA40";
+            cfg.timeframe = PERIOD_H1;
+            cfg.strategyType = STRATEGY_TREND_FOLLOWING;
+            cfg.riskPercent = 1.0;
+            cfg.magicNumber = 7004;
+            fra40_1.SetConfig(cfg);
+            if(m_strategyDispatcher.RegisterStrategy(fra40_1)) { Print("    ✓ FRA40 Strategy 1 (MACD EMA) Active"); registeredCount++; }
+            else delete fra40_1;
+        }
+
+        // Forex
+        if(m_config.enable_GBPNZD_Strat1)
+        {
+            CGBPNZD_Strategy1_CorrelationReversal* gbpnzd1 = new CGBPNZD_Strategy1_CorrelationReversal(m_logger, m_riskManager);
+            StrategyConfig cfg;
+            cfg.symbol = "GBPNZD";
+            cfg.timeframe = PERIOD_D1;
+            cfg.strategyType = STRATEGY_MEAN_REVERSION;
+            cfg.riskPercent = 1.0;
+            cfg.magicNumber = 7005;
+            gbpnzd1.SetConfig(cfg);
+            if(m_strategyDispatcher.RegisterStrategy(gbpnzd1)) { Print("    ✓ GBPNZD Strategy 1 (Correlation) Active"); registeredCount++; }
+            else delete gbpnzd1;
+        }
+
+        // Metals
+        if(m_config.enable_XAGUSD_Strat3)
+        {
+            CXAGUSD_Strategy3_MeanReversion* xag3 = new CXAGUSD_Strategy3_MeanReversion(m_logger, m_riskManager);
+            StrategyConfig cfg;
+            cfg.symbol = "XAGUSD";
+            cfg.timeframe = PERIOD_H4;
+            cfg.strategyType = STRATEGY_MEAN_REVERSION;
+            cfg.riskPercent = 1.0;
+            cfg.magicNumber = 7006;
+            xag3.SetConfig(cfg);
+            if(m_strategyDispatcher.RegisterStrategy(xag3)) { Print("    ✓ XAGUSD Strategy 3 (MeanRev) Active"); registeredCount++; }
+            else delete xag3;
+        }
+        if(m_config.enable_XAGUSD_Strat4)
+        {
+            CXAGUSD_Strategy4_PairsTrading* xag4 = new CXAGUSD_Strategy4_PairsTrading(m_logger, m_riskManager);
+            StrategyConfig cfg;
+            cfg.symbol = "XAGUSD";
+            cfg.timeframe = PERIOD_D1;
+            cfg.strategyType = STRATEGY_MEAN_REVERSION;
+            cfg.riskPercent = 1.0;
+            cfg.magicNumber = 7007;
+            xag4.SetConfig(cfg);
+            if(m_strategyDispatcher.RegisterStrategy(xag4)) { Print("    ✓ XAGUSD Strategy 4 (Pairs) Active"); registeredCount++; }
+            else delete xag4;
+        }
+
         Print("");  // Blank line
         m_logger.Info(StringFormat("Strategy registration complete: %d strategies active", registeredCount), "EAEngine");
         Print(StringFormat("  Total Active Strategies: %d\n", registeredCount));

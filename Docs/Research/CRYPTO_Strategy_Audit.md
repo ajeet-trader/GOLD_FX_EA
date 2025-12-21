@@ -62,7 +62,8 @@ The focus is on **rule-based, indicator-driven strategies that can be implemente
 
 ### Strategy BTC‑1: RSI + MACD Swing Strategy (4H)  
 **Type:** Directional swing, hybrid momentum/mean‑reversion  
-**Validation Score:** 88/100
+**Validation Score:** 88/100  
+**Status:** ✅ IMPLEMENTED (`BTCUSD_Strategy1_RSI_MACD.mqh`)
 
 This strategy combines **RSI** to detect local exhaustion with **MACD** for momentum confirmation. Multiple public backtests on BTC show that filtered RSI + MACD combinations can reach **65–77% win rate** with reasonable profit factors, provided trades avoid low‑liquidity times and use volatility‑aware stops [222][223][225].
 
@@ -132,7 +133,8 @@ Mirror of long:
 
 ### Strategy BTC‑2: Volatility Breakout with ATR Bands (4H)  
 **Type:** Trend‑following breakout  
-**Validation Score:** 84/100
+**Validation Score:** 84/100  
+**Status:** ✅ IMPLEMENTED (`BTCUSD_Strategy2_ATR_Breakout.mqh`)
 
 This strategy attempts to capture **large impulse moves** common in BTC after consolidation. It uses ATR to determine when a move is large enough to justify entry, reducing whipsaws typical of constant‑range breakouts.
 
@@ -219,7 +221,8 @@ Simple MA crossover strategies on BTC can outperform buy‑and‑hold when prope
 
 ### Strategy ETH‑1: Mean Reverting False Breakout System (4H / Daily)  
 **Type:** Mean reversion  
-**Validation Score:** 86/100
+**Validation Score:** 86/100  
+**Status:** ✅ IMPLEMENTED (`ETHUSD_Strategy1_False_Breakout.mqh`)
 
 A documented trading system on ETH exploits **false breakouts** from local ranges: break beyond a key level that quickly reverts back inside, indicating exhaustion rather than continuation [224].
 
@@ -260,7 +263,8 @@ A documented trading system on ETH exploits **false breakouts** from local range
 
 ### Strategy ETH‑2: Trend Following with BTC Confirmation (4H)  
 **Type:** Trend following / cross‑asset confirmation  
-**Validation Score:** 83/100
+**Validation Score:** 83/100  
+**Status:** ✅ IMPLEMENTED (`ETHUSD_Strategy2_BTC_Aligned.mqh`)
 
 Given strong but time‑varying BTC–ETH correlation, a conservative ETH trend strategy only trades when **BTC and ETH trends align**, improving signal quality [272][275].
 
@@ -300,7 +304,8 @@ Given strong but time‑varying BTC–ETH correlation, a conservative ETH trend 
 
 ### Strategy XRP‑1: Range‑Bound Mean Reversion (4H)  
 **Type:** Range trading  
-**Validation Score:** 82/100
+**Validation Score:** 82/100  
+**Status:** ✅ IMPLEMENTED (`XRPUSD_Strategy1_MeanRev.mqh`)
 
 Vestinda and other platforms show that simple RSI/BB‑style mean‑reversion strategies on XRP during non‑trending periods can perform well [241].
 
@@ -350,7 +355,8 @@ Because XRP is extremely sensitive to litigation / regulatory news, a breakout s
 
 ### Strategy LTC/ADA‑1: BTC‑Anchored Trend Following (4H)  
 **Type:** Beta‑leveraged trend following  
-**Validation Score:** 80/100
+**Validation Score:** 80/100  
+**Status:** ✅ IMPLEMENTED (`LTCUSD_Strategy2_BTC_Anchored.mqh` / `ADAUSD_Strategy1_TrendFollowing.mqh`)
 
 #### Concept
 
@@ -392,7 +398,8 @@ Because XRP is extremely sensitive to litigation / regulatory news, a breakout s
 
 ### Strategy SOL‑1: Breakout Trend Strategy (4H)  
 **Type:** Volatility breakout / trend following  
-**Validation Score:** 85/100
+**Validation Score:** 85/100  
+**Status:** ✅ IMPLEMENTED (`SOLUSD_Strategy1_Breakout.mqh`)
 
 Vestinda and trading‑guide case studies show that Solana responds well to **breakouts of well‑defined consolidation ranges**, often leading to extended moves [245][248].
 

@@ -1,0 +1,55 @@
+# Compiled files
+*.ex5
+*.ex4
+
+# MT5 logs and temp files
+*.log
+*.chr
+*.tpl
+*.ini
+
+# IDE specific
+.vscode/
+.idea/
+*.suo
+*.user
+
+# OS files
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+env/
+.env
+*.egg-info/
+dist/
+build/
+
+# Temporary and cache
+*.tmp
+*.temp
+*.cache
+.cache/
+
+# HTML reports (keep Excel only)
+Backtest_Reports/*.html
+/backtest_results/*.html
+
+# Local configurations (keep templates)
+*.local.ini
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Test artifacts
+/test_output/
+/coverage/

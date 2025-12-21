@@ -82,8 +82,73 @@ struct EAConfig
     bool enable_USDJPY_Strat1;
     bool enable_USDJPY_Strat2;
     bool enable_BTCUSD_Momentum;
-    bool enable_XAUUSD_Scalping;
+    // Metals
+    bool enable_XAUUSD_Strat1;
+    bool enable_XAUUSD_Strat2;
+    bool enable_XAUUSD_Strat3;
+    // Remaining Forex
+    bool enable_EURGBP_Strat1;
+    bool enable_AUDUSD_Strat1;
+    
+    // Crypto Strategies
+    bool enable_BTCUSD_Strat1;
+    bool enable_BTCUSD_Strat2;
+    bool enable_ETHUSD_Strat1;
+    bool enable_SOLUSD_Strat1;
+    bool enable_XRPUSD_Strat1;
+    
+    // Additional Metals
+    bool enable_XAGUSD_Strat1;
+    bool enable_XAUEUR_Strat1;
+    
+    // Additional Forex
+    bool enable_NZDUSD_Strat1;
+    bool enable_USDCHF_Strat1;
+    bool enable_USDCAD_Strat1;
+    bool enable_GBPJPY_Strat1;
+    bool enable_EURNZD_Strat1;
+    
     bool enable_SP500_MeanRev;
+    
+    // Energy
+    bool enable_USOIL_Strat1;
+    bool enable_USOIL_Strat2;
+    bool enable_UKOIL_Strat1;
+    bool enable_NATGAS_Strat1;
+    bool enable_NATGAS_Strat2;
+    bool enable_COPPER_Strat1;
+    bool enable_COPPER_Strat2;
+    
+    // Additional Crypto
+    bool enable_LTCUSD_Strat1;
+    bool enable_LTCUSD_Strat2;
+    bool enable_ADAUSD_Strat1;
+    
+    // Additional Indices
+    bool enable_USTEC_Strat1;
+    bool enable_DE30_Strat1;
+    bool enable_US30_Strat1;
+    
+    // New Crypto
+    bool enable_ETHUSD_Strat2;
+    
+    // New Forex
+    bool enable_CADJPY_Strat1;
+    bool enable_CHFJPY_Strat1;
+    bool enable_AUDNZD_Strat1;
+    
+    // New Metals
+    bool enable_XAGUSD_Strat2;
+    bool enable_XAUEUR_Strat2;
+    
+    // Final Audit Strategies
+    bool enable_JP225_Strat1;
+    bool enable_FTSE100_Strat1;
+    bool enable_AUS200_Strat1;
+    bool enable_FRA40_Strat1;
+    bool enable_GBPNZD_Strat1;
+    bool enable_XAGUSD_Strat3;
+    bool enable_XAGUSD_Strat4;
     
     // Constructor with default values
     EAConfig()
@@ -105,8 +170,66 @@ struct EAConfig
         enable_USDJPY_Strat1 = false;
         enable_USDJPY_Strat2 = false;
         enable_BTCUSD_Momentum = false;
-        enable_XAUUSD_Scalping = false;
-        enable_SP500_MeanRev = false;
+        enable_XAUUSD_Strat1 = false;
+        enable_XAUUSD_Strat2 = false;
+        enable_XAUUSD_Strat3 = false;
+        enable_EURGBP_Strat1 = false;
+        enable_AUDUSD_Strat1 = false;
+        
+        enable_BTCUSD_Strat1 = false;
+        enable_BTCUSD_Strat2 = false;
+        enable_ETHUSD_Strat1 = false;
+         enable_SOLUSD_Strat1 = false;
+         enable_XRPUSD_Strat1 = false;
+         
+         enable_XAGUSD_Strat1 = false;
+         enable_XAUEUR_Strat1 = false;
+         
+         enable_NZDUSD_Strat1 = false;
+         enable_USDCHF_Strat1 = false;
+         enable_USDCAD_Strat1 = false;
+         enable_GBPJPY_Strat1 = false;
+         enable_EURNZD_Strat1 = false;
+         
+         enable_SP500_MeanRev = false;
+         
+         // Energy
+         enable_USOIL_Strat1 = false;
+         enable_USOIL_Strat2 = false;
+         enable_UKOIL_Strat1 = false;
+         enable_NATGAS_Strat1 = false;
+         enable_NATGAS_Strat2 = false;
+         enable_COPPER_Strat1 = false;
+         enable_COPPER_Strat2 = false;
+         
+         // Crypto
+         enable_LTCUSD_Strat1 = false;
+         enable_LTCUSD_Strat2 = false;
+         enable_ADAUSD_Strat1 = false;
+         enable_ETHUSD_Strat2 = false;
+         
+         // Indices
+         enable_USTEC_Strat1 = false;
+         enable_DE30_Strat1 = false;
+         enable_US30_Strat1 = false;
+         
+         // Forex
+         enable_CADJPY_Strat1 = false;
+         enable_CHFJPY_Strat1 = false;
+         enable_AUDNZD_Strat1 = false;
+         
+         // Metals
+         enable_XAGUSD_Strat2 = false;
+         enable_XAUEUR_Strat2 = false;
+         
+         // Final Audit Strategies
+         enable_JP225_Strat1 = false;
+         enable_FTSE100_Strat1 = false;
+         enable_AUS200_Strat1 = false;
+         enable_FRA40_Strat1 = false;
+         enable_GBPNZD_Strat1 = false;
+         enable_XAGUSD_Strat3 = false;
+         enable_XAGUSD_Strat4 = false;
     }
 };
 
